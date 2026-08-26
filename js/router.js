@@ -1,7 +1,7 @@
 const Router = {
   currentPage: 'home',
   currentDetailId: null,
-  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'booking', 'booking-success'],
+  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login'],
   authRequired: ['profile', 'orders', 'notifications', 'favorites'],
 
   init() {
@@ -14,19 +14,23 @@ const Router = {
     const parts = hash.split('/');
     const page = parts[0];
 
-    if (page === 'detail' && parts[1]) {
+    if (page === 'admin' && parts[1]) {
+      if (parts[1] === 'login') {
+        this.navigateToSub('admin/login');
+      } else if (parts[1] === 'dashboard') {
+        this.navigateToAdmin('admin/dashboard');
+      } else {
+        this.navigateTo('home');
+      }
+    } else if (page === 'detail' && parts[1]) {
       this.navigateTo('detail', parseInt(parts[1]));
-    } else if (page === 'booking' && parts[1]) {
-      this.navigateToSub('booking', parseInt(parts[1]));
-    } else if (page === 'booking-success' && parts[1]) {
-      this.navigateToSub('booking-success', parts[1]);
     } else if (this.subPages.includes(page)) {
       if (this.authRequired.includes(page) && !AuthService.isLoggedIn) {
         window.location.hash = 'login';
         return;
       }
       this.navigateToSub(page);
-    } else if (['home', 'programs', 'bookings', 'more'].includes(page)) {
+    } else if (['home', 'programs', 'more'].includes(page)) {
       this.navigateTo(page);
     } else {
       this.navigateTo('home');
@@ -75,7 +79,8 @@ const Router = {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
 
-    const targetPage = document.getElementById(`page-${page}`);
+    const elementId = page === 'admin/login' ? 'page-admin-login' : `page-${page}`;
+    const targetPage = document.getElementById(elementId);
     if (targetPage) {
       targetPage.classList.add('active');
     }
@@ -96,9 +101,28 @@ const Router = {
       case 'orders': renderOrdersPage(); break;
       case 'notifications': renderNotificationsPage(); break;
       case 'favorites': renderFavoritesPage(); break;
-      case 'booking': renderBookingFormPage(param); break;
-      case 'booking-success': renderBookingSuccessPage(param); break;
+      case 'admin/login': renderAdminLoginPage(); break;
     }
+  },
+
+  navigateToAdmin(page) {
+    this.currentPage = 'admin';
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+
+    const targetPage = document.getElementById('page-admin-dashboard');
+    if (targetPage) {
+      targetPage.classList.add('active');
+    }
+
+    const bottomNav = document.getElementById('bottom-nav');
+    const header = document.getElementById('app-header');
+    bottomNav.style.display = 'none';
+    header.style.display = 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderAdminDashboard();
   }
 };
 

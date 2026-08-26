@@ -139,7 +139,7 @@ function renderDetailPage(programId) {
 }
 
 function handleBooking(programId) {
-  window.location.hash = `booking/${programId}`;
+  openWhatsAppBooking(programId);
 }
 
 function toggleAccordion(header) {
