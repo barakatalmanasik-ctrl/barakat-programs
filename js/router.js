@@ -51,6 +51,9 @@ const Router = {
 
     const bottomNav = document.getElementById('bottom-nav');
     const header = document.getElementById('app-header');
+    const main = document.querySelector('.app__main');
+    main.style.marginTop = '';
+    main.style.paddingBottom = '';
     renderBottomNav(page === 'detail' ? 'home' : page);
     setupBottomNavListeners();
 
@@ -87,8 +90,17 @@ const Router = {
 
     const bottomNav = document.getElementById('bottom-nav');
     const header = document.getElementById('app-header');
+    const main = document.querySelector('.app__main');
     bottomNav.style.display = 'none';
     header.style.display = 'none';
+
+    if (page.startsWith('admin')) {
+      main.style.marginTop = '0';
+      main.style.paddingBottom = '0';
+    } else {
+      main.style.marginTop = '';
+      main.style.paddingBottom = '';
+    }
 
     renderBottomNav(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -118,8 +130,11 @@ const Router = {
 
     const bottomNav = document.getElementById('bottom-nav');
     const header = document.getElementById('app-header');
+    const main = document.querySelector('.app__main');
     bottomNav.style.display = 'none';
     header.style.display = 'none';
+    main.style.marginTop = '0';
+    main.style.paddingBottom = '0';
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
     renderAdminDashboard();

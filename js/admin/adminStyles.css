@@ -1,10 +1,23 @@
 .admin-login {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-xl);
   background: var(--color-bg);
+}
+
+#page-admin-login.active,
+#page-admin-dashboard.active {
+  margin-top: calc(-1 * var(--header-height));
+  padding-bottom: calc(-1 * var(--bottom-nav-height-safe));
+}
+
+#page-admin-login.active .admin-login,
+#page-admin-dashboard.active .admin-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .admin-login .auth-page {
