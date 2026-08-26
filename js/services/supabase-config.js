@@ -1,8 +1,6 @@
 // Supabase Configuration
-// IMPORTANT: Replace these values with your actual Supabase project credentials
-// Do NOT commit real keys to version control
 
 const SUPABASE_CONFIG = {
-  url: 'YOUR_SUPABASE_URL',
-  anonKey: 'YOUR_SUPABASE_ANON_KEY'
+  url: 'https://fulgfalcqerwcvfbahel.supabase.co',
+  anonKey: 'sb_publishable_AUB0Bq5JDH_aoIEk0nV6kg_T710Calx'
 };
