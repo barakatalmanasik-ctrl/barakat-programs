@@ -9,9 +9,9 @@ const AuthService = {
 
   async init() {
     // Try Supabase first
-    if (SupabaseClient && SupabaseClient.isConfigured) {
-      this._useSupabase = true;
-      try {
+    try {
+      if (typeof SupabaseClient !== 'undefined' && SupabaseClient.isConfigured) {
+        this._useSupabase = true;
         const { data: { session } } = await SupabaseClient.auth.getSession();
         if (session?.user) {
           await this._fetchProfile(session.user);
@@ -27,12 +27,12 @@ const AuthService = {
             await this._fetchProfile(session.user);
           }
         });
-      } catch (e) {
-        console.error('Supabase init error:', e);
-        this._useSupabase = false;
+      } else {
         this._loadFromStorage();
       }
-    } else {
+    } catch (e) {
+      console.error('Supabase init error:', e);
+      this._useSupabase = false;
       this._loadFromStorage();
     }
     this._initialized = true;

@@ -177,7 +177,7 @@ INSERT INTO programs (
 ) VALUES (
   'جولة أهرامات مصر',
   (SELECT id FROM destinations WHERE name = 'مصر'),
-  'tourism', 'soon', '🏛️',
+  'tourism', 'published', '🏛️',
   'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
   '2026-12-01', '2026-12-06',
   '1 ديسمبر 2026', '6 ديسمبر 2026',

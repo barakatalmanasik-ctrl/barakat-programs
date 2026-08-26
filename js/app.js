@@ -3,17 +3,25 @@ function renderBottomNav(page) {
 }
 
 async function initApp() {
-  // Initialize Supabase first
-  if (typeof SupabaseClient !== 'undefined') {
-    SupabaseClient.init();
+  try {
+    // Initialize Supabase first
+    if (typeof SupabaseClient !== 'undefined') {
+      SupabaseClient.init();
+    }
+
+    // AuthService.init() is now async for Supabase
+    await AuthService.init();
+  } catch (e) {
+    console.error('Auth initialization error:', e);
   }
 
-  // AuthService.init() is now async for Supabase
-  await AuthService.init();
-
-  FavoritesService.init();
-  NotificationsService.init();
-  OrdersService.init();
+  try {
+    FavoritesService.init();
+    NotificationsService.init();
+    OrdersService.init();
+  } catch (e) {
+    console.error('Service initialization error:', e);
+  }
 
   renderHeader();
   renderBottomNav('home');

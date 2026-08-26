@@ -7,8 +7,8 @@ vendor/
 .env.local
 .env.*.local
 
-# Supabase config with real keys
-js/services/supabase-config.js
+# Supabase config is committed with placeholder values
+# Real credentials are configured locally or via Vercel env vars
 
 # Build output
 dist/
