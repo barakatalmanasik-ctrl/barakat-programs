@@ -139,7 +139,7 @@ function renderDetailPage(programId) {
 }
 
 function handleBooking(programId) {
-  alert('سيتم تفعيل نظام الحجز في المرحلة القادمة.');
+  window.location.hash = `booking/${programId}`;
 }
 
 function toggleAccordion(header) {
