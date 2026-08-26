@@ -33,7 +33,6 @@ async function initApp() {
 
   if (isAdminDomain() && !window.location.hash) {
     window.location.hash = 'admin/login';
-    return;
   }
 
   Router.init();
