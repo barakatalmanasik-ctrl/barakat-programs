@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1B3A5C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>بركات المناسك للسفر والسياحة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app__header" id="app-header"></header>
+
+    <main class="app__main">
+      <div class="app__main-inner">
+        <div id="page-home" class="page active">
+          <div id="home-content"></div>
+        </div>
+        <div id="page-programs" class="page">
+          <div id="programs-content"></div>
+        </div>
+        <div id="page-bookings" class="page">
+          <div style="padding: 24px 16px;">
+            <div class="empty-state">
+              <div class="empty-state__icon">📋</div>
+              <h3 class="empty-state__title">لا توجد حجوزات بعد</h3>
+              <p class="empty-state__text">ابدأ باستكشاف برامجنا واحجز رحلتك الأولى معنا</p>
+            </div>
+          </div>
+        </div>
+        <div id="page-more" class="page">
+          <div id="more-content"></div>
+        </div>
+        <div id="page-detail" class="page">
+          <div id="detail-content"></div>
+        </div>
+
+        <div id="page-login" class="page sub-page">
+          <div id="login-content"></div>
+        </div>
+        <div id="page-register" class="page sub-page">
+          <div id="register-content"></div>
+        </div>
+        <div id="page-profile" class="page sub-page">
+          <div id="profile-content"></div>
+        </div>
+        <div id="page-orders" class="page sub-page">
+          <div id="orders-content"></div>
+        </div>
+        <div id="page-notifications" class="page sub-page">
+          <div id="notifications-content"></div>
+        </div>
+        <div id="page-favorites" class="page sub-page">
+          <div id="favorites-content"></div>
+        </div>
+      </div>
+    </main>
+
+    <div class="app__bottom-nav" id="bottom-nav"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/services/supabase-config.js"></script>
+  <script src="js/services/supabaseClient.js"></script>
+  <script src="js/data/mockData.js"></script>
+  <script src="js/components/icons.js"></script>
+  <script src="js/components/Header.js"></script>
+  <script src="js/components/BottomNavigation.js"></script>
+  <script src="js/components/ProgramCard.js"></script>
+  <script src="js/components/DestinationCard.js"></script>
+  <script src="js/components/HotelCard.js"></script>
+  <script src="js/components/DayAccordion.js"></script>
+  <script src="js/components/SearchBar.js"></script>
+  <script src="js/components/FilterPanel.js"></script>
+  <script src="js/components/EmptyState.js"></script>
+  <script src="js/components/LoadingState.js"></script>
+  <script src="js/components/FilterBottomSheet.js"></script>
+  <script src="js/services/authService.js"></script>
+  <script src="js/services/dataService.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/pages/HomePage.js"></script>
+  <script src="js/pages/ProgramsPage.js"></script>
+  <script src="js/pages/DetailPage.js"></script>
+  <script src="js/pages/MorePage.js"></script>
+  <script src="js/pages/LoginPage.js"></script>
+  <script src="js/pages/RegisterPage.js"></script>
+  <script src="js/pages/ProfilePage.js"></script>
+  <script src="js/pages/OrdersPage.js"></script>
+  <script src="js/pages/NotificationsPage.js"></script>
+  <script src="js/pages/FavoritesPage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

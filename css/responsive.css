@@ -1,0 +1,125 @@
+@media (max-width: 359px) {
+  :root {
+    --font-size-base: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 22px;
+  }
+
+  .program-card__meta {
+    gap: var(--space-md);
+  }
+
+  .destination-card {
+    width: 95px;
+    height: 115px;
+  }
+
+  .detail-page__info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .more-page__auth-buttons {
+    flex-direction: column;
+  }
+
+  .filter-sheet__panel {
+    max-height: 90vh;
+  }
+
+  .hotel-card__details {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+}
+
+@media (min-width: 360px) and (max-width: 414px) {
+  .program-card__image {
+    height: 190px;
+  }
+}
+
+@media (min-width: 415px) and (max-width: 767px) {
+  .programs-page__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  .program-card__image {
+    height: 160px;
+  }
+
+  .destination-card {
+    width: 120px;
+    height: 140px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .programs-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detail-page__hotels {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .programs-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .destinations-scroll {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .detail-page__content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .detail-page__hotels {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+@media (hover: none) {
+  .program-card:hover {
+    box-shadow: var(--shadow-sm);
+    transform: none;
+  }
+
+  .destination-card:hover {
+    transform: none;
+  }
+
+  .bottom-nav__item:active {
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .app__bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .detail-page__booking-bar {
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+  }
+}
