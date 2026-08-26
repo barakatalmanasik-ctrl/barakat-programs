@@ -16,10 +16,10 @@ function renderLoginPage() {
       </div>
       <form class="auth-form" id="login-form" onsubmit="handleLoginForm(event)">
         <div class="auth-form__group">
-          <label class="auth-form__label">رقم الهاتف أو البريد الإلكتروني</label>
+          <label class="auth-form__label">البريد الإلكتروني</label>
           <div class="auth-form__input-wrapper">
-            <svg class="auth-form__input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <input type="text" class="auth-form__input" id="login-identifier" placeholder="أدخل رقم الهاتف أو البريد" required autocomplete="username">
+            <svg class="auth-form__input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" class="auth-form__input" id="login-email" placeholder="example@email.com" required dir="ltr" style="text-align:right" autocomplete="email">
           </div>
         </div>
         <div class="auth-form__group">
@@ -38,7 +38,7 @@ function renderLoginPage() {
             <span class="auth-form__checkbox-mark"></span>
             تذكر تسجيل الدخول
           </label>
-          <a class="auth-form__link" href="#" onclick="event.preventDefault(); handleForgotPassword()">نسيت كلمة المرور؟</a>
+          <a class="auth-form__link" href="#forgot-password">نسيت كلمة المرور؟</a>
         </div>
         <div id="login-error" class="auth-form__error" style="display:none"></div>
         <button type="submit" class="auth-form__submit" id="login-submit">
@@ -54,13 +54,13 @@ function renderLoginPage() {
 
 async function handleLoginForm(e) {
   e.preventDefault();
-  const identifier = document.getElementById('login-identifier').value.trim();
+  const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const remember = document.getElementById('login-remember').checked;
   const errorEl = document.getElementById('login-error');
   const submitBtn = document.getElementById('login-submit');
 
-  if (!identifier || !password) {
+  if (!email || !password) {
     errorEl.textContent = 'يرجى ملء جميع الحقول';
     errorEl.style.display = 'block';
     return;
@@ -70,7 +70,7 @@ async function handleLoginForm(e) {
   submitBtn.innerHTML = '<span class="auth-form__spinner"></span>';
   errorEl.style.display = 'none';
 
-  const result = await AuthService.login(identifier, password, remember);
+  const result = await AuthService.login(email, password, remember);
   submitBtn.disabled = false;
   submitBtn.innerHTML = '<span>تسجيل الدخول</span>';
 
@@ -79,28 +79,6 @@ async function handleLoginForm(e) {
   } else {
     errorEl.textContent = result.error;
     errorEl.style.display = 'block';
-  }
-}
-
-async function handleForgotPassword() {
-  const email = prompt('أدخل بريدك الإلكتروني لإرسال رابط إعادة تعيين كلمة المرور:');
-  if (!email) return;
-
-  if (AuthService.isSupabase) {
-    try {
-      const { error } = await SupabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin
-      });
-      if (error) {
-        alert('حدث خطأ: ' + error.message);
-      } else {
-        alert('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
-      }
-    } catch (e) {
-      alert('حدث خطأ أثناء إرسال الرابط');
-    }
-  } else {
-    alert('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني (ميزة قادمة قريباً)');
   }
 }
 

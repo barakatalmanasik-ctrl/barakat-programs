@@ -222,8 +222,7 @@ const AuthService = {
     try {
       const updates = {};
       if (data.name) updates.full_name = data.name;
-      if (data.phone) updates.phone = data.phone;
-      if (data.email) updates.email = data.email;
+      if (data.phone !== undefined) updates.phone = data.phone;
 
       const { error } = await SupabaseClient
         .from('profiles')
@@ -231,9 +230,6 @@ const AuthService = {
         .eq('id', this._user.id);
 
       if (error) {
-        if (error.message.includes('duplicate')) {
-          return { success: false, error: 'البريد الإلكتروني أو رقم الهاتف مستخدم من حساب آخر' };
-        }
         return { success: false, error: 'حدث خطأ أثناء تحديث البيانات' };
       }
 

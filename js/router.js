@@ -1,7 +1,8 @@
 const Router = {
   currentPage: 'home',
   currentDetailId: null,
-  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites'],
+  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password'],
+  authRequired: ['profile', 'orders', 'notifications', 'favorites'],
 
   init() {
     this.handleHashChange();
@@ -16,6 +17,10 @@ const Router = {
     if (page === 'detail' && parts[1]) {
       this.navigateTo('detail', parseInt(parts[1]));
     } else if (this.subPages.includes(page)) {
+      if (this.authRequired.includes(page) && !AuthService.isLoggedIn) {
+        window.location.hash = 'login';
+        return;
+      }
       this.navigateToSub(page);
     } else if (['home', 'programs', 'bookings', 'more'].includes(page)) {
       this.navigateTo(page);
@@ -37,7 +42,7 @@ const Router = {
     }
 
     const bottomNav = document.getElementById('bottom-nav');
-    const header = document.querySelector('.app-header');
+    const header = document.getElementById('app-header');
     renderBottomNav(page === 'detail' ? 'home' : page);
     setupBottomNavListeners();
 
@@ -72,7 +77,7 @@ const Router = {
     }
 
     const bottomNav = document.getElementById('bottom-nav');
-    const header = document.querySelector('.app-header');
+    const header = document.getElementById('app-header');
     bottomNav.style.display = 'none';
     header.style.display = 'none';
 
@@ -82,6 +87,7 @@ const Router = {
     switch(page) {
       case 'login': renderLoginPage(); break;
       case 'register': renderRegisterPage(); break;
+      case 'forgot-password': renderForgotPasswordPage(); break;
       case 'profile': renderProfilePage(); break;
       case 'orders': renderOrdersPage(); break;
       case 'notifications': renderNotificationsPage(); break;

@@ -28,8 +28,8 @@ function renderProfilePage() {
           </div>
           <div class="profile-page__field">
             <div class="profile-page__field-label">البريد الإلكتروني</div>
-            <div class="profile-page__field-value" id="profile-email-display">${user.email}</div>
-            <input type="email" class="profile-page__field-input" id="profile-email-input" value="${user.email}" style="display:none">
+            <div class="profile-page__field-value" id="profile-email-display">${user.email}${AuthService.isSupabase ? ' <small style="color:var(--color-text-secondary);font-size:11px">(لتغيير البريد تواصل معنا)</small>' : ''}</div>
+            ${!AuthService.isSupabase ? '<input type="email" class="profile-page__field-input" id="profile-email-input" value="' + user.email + '" style="display:none">' : ''}
           </div>
           <div class="profile-page__field">
             <div class="profile-page__field-label">رقم الهاتف</div>
@@ -91,9 +91,12 @@ function renderProfilePage() {
 }
 
 function toggleProfileEdit() {
-  ['name', 'email', 'phone'].forEach(f => {
-    document.getElementById(`profile-${f}-display`).style.display = 'none';
-    document.getElementById(`profile-${f}-input`).style.display = 'block';
+  const fields = AuthService.isSupabase ? ['name', 'phone'] : ['name', 'email', 'phone'];
+  fields.forEach(f => {
+    const display = document.getElementById(`profile-${f}-display`);
+    const input = document.getElementById(`profile-${f}-input`);
+    if (display) display.style.display = 'none';
+    if (input) input.style.display = 'block';
   });
   document.getElementById('profile-edit-actions').style.display = 'none';
   document.getElementById('profile-save-actions').style.display = 'flex';
@@ -101,12 +104,16 @@ function toggleProfileEdit() {
 
 function cancelProfileEdit() {
   const user = AuthService.currentUser;
-  ['name', 'email', 'phone'].forEach(f => {
-    document.getElementById(`profile-${f}-display`).style.display = '';
-    document.getElementById(`profile-${f}-input`).style.display = 'none';
+  const fields = AuthService.isSupabase ? ['name', 'phone'] : ['name', 'email', 'phone'];
+  fields.forEach(f => {
+    const display = document.getElementById(`profile-${f}-display`);
+    const input = document.getElementById(`profile-${f}-input`);
+    if (display) display.style.display = '';
+    if (input) input.style.display = 'none';
   });
   document.getElementById('profile-name-input').value = user.name;
-  document.getElementById('profile-email-input').value = user.email;
+  const emailInput = document.getElementById('profile-email-input');
+  if (emailInput) emailInput.value = user.email;
   document.getElementById('profile-phone-input').value = user.phone || '';
   document.getElementById('profile-edit-actions').style.display = 'flex';
   document.getElementById('profile-save-actions').style.display = 'none';
@@ -116,13 +123,14 @@ function cancelProfileEdit() {
 
 async function saveProfile() {
   const name = document.getElementById('profile-name-input').value.trim();
-  const email = document.getElementById('profile-email-input').value.trim();
+  const emailInput = document.getElementById('profile-email-input');
+  const email = emailInput ? emailInput.value.trim() : AuthService.currentUser.email;
   const phone = document.getElementById('profile-phone-input').value.trim() || null;
   const errorEl = document.getElementById('profile-error');
   const successEl = document.getElementById('profile-success');
 
-  if (!name || !email) {
-    errorEl.textContent = 'يرجى ملء الحقول المطلوبة (الاسم والبريد الإلكتروني)';
+  if (!name) {
+    errorEl.textContent = 'يرجى إدخال الاسم';
     errorEl.style.display = 'block';
     successEl.style.display = 'none';
     return;
@@ -141,7 +149,8 @@ async function saveProfile() {
 }
 
 async function changePassword() {
-  const current = document.getElementById('current-password').value;
+  const currentEl = document.getElementById('current-password');
+  const current = currentEl ? currentEl.value : '';
   const newPass = document.getElementById('new-password').value;
   const confirm = document.getElementById('confirm-new-password').value;
   const errorEl = document.getElementById('password-error');
@@ -174,7 +183,7 @@ async function changePassword() {
   if (result.success) {
     successEl.textContent = 'تم تغيير كلمة المرور بنجاح';
     successEl.style.display = 'block';
-    document.getElementById('current-password').value = '';
+    if (currentEl) currentEl.value = '';
     document.getElementById('new-password').value = '';
     document.getElementById('confirm-new-password').value = '';
   } else {
