@@ -2,14 +2,16 @@ function renderBottomNav(page) {
   document.getElementById('bottom-nav').innerHTML = BottomNavigation(page || 'home');
 }
 
+function isAdminDomain() {
+  const host = window.location.hostname;
+  return host.startsWith('admin.') || host.includes('admin-');
+}
+
 async function initApp() {
   try {
-    // Initialize Supabase first
     if (typeof SupabaseClient !== 'undefined') {
       SupabaseClient.init();
     }
-
-    // AuthService.init() is now async for Supabase
     await AuthService.init();
   } catch (e) {
     console.error('Auth initialization error:', e);
@@ -28,6 +30,12 @@ async function initApp() {
   renderHomePage();
   renderProgramsPage();
   renderMorePage();
+
+  if (isAdminDomain() && !window.location.hash) {
+    window.location.hash = 'admin/login';
+    return;
+  }
+
   Router.init();
 
   setupBottomNavListeners();
