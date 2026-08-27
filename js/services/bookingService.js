@@ -10,6 +10,16 @@ const BookingService = {
       const user = AuthService.currentUser;
       const uid = user && user.id ? user.id : null;
 
+      // Guard against mock/numeric program ids reaching the DB (they violate the
+      // UUID foreign key on bookings.program_id). Only real Supabase rows qualify.
+      const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!bookingData.programId || !UUID_REGEX.test(String(bookingData.programId))) {
+        return {
+          success: false,
+          error: 'عذراً، هذا البرنامج غير متاح للحجز عبر الموقع حالياً. يرجى الاتصال على أرقام خدمة الزبائن.'
+        };
+      }
+
       const row = {
         user_id: uid,
         program_id: bookingData.programId,

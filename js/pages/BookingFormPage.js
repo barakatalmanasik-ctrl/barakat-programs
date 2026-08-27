@@ -287,7 +287,7 @@ async function handleBookingSubmit(e, programId) {
   if (result.success) {
     window.location.hash = `booking-success/${result.orderNumber}`;
   } else {
-    errorEl.textContent = 'تعذر إرسال طلب الحجز، يرجى المحاولة مرة أخرى.';
+    errorEl.textContent = 'تعذر إرسال طلب الحجز (' + (result.error || 'خطأ غير معروف') + '). يرجى المحاولة مرة أخرى.';
     errorEl.style.display = 'block';
     console.error('Booking error:', result.error);
   }
