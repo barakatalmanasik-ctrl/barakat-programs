@@ -1,6 +1,6 @@
 function renderDetailPage(programId) {
   const container = document.getElementById('detail-content');
-  const program = MockData.programs.find(p => p.id === programId);
+  const program = ProgramsService.getById(programId);
 
   if (!program) {
     container.innerHTML = EmptyState('❌', 'البرنامج غير موجود', 'عذراً، لم نتمكن من العثور على هذا البرنامج.');
@@ -130,7 +130,7 @@ function renderDetailPage(programId) {
           <span class="detail-page__booking-price-value">${program.price.toLocaleString('ar-SA')} ${program.currency}</span>
           <span class="detail-page__booking-price-per">للشخص الواحد</span>
         </div>
-        <button class="detail-page__booking-btn" onclick="handleBooking(${program.id})" ${program.status === 'full' ? 'disabled' : ''}>
+        <button class="detail-page__booking-btn" onclick="handleBooking('${program.id}')" ${program.status === 'full' ? 'disabled' : ''}>
           ${program.status === 'full' ? 'مكتمل' : 'طلب الحجز'}
         </button>
       </div>

@@ -1,5 +1,5 @@
 function openWhatsAppBooking(programId) {
-  const program = MockData.programs.find(p => p.id === programId);
+  const program = ProgramsService.getById(programId);
   if (!program) return;
 
   closeWhatsAppBooking();
@@ -28,7 +28,7 @@ function openWhatsAppBooking(programId) {
               <div class="whatsapp-modal__program-dest">${program.destinationEmoji} ${program.destination}</div>
             </div>
           </div>
-          <form id="whatsapp-booking-form" onsubmit="handleWhatsAppBookingSubmit(event, ${programId})">
+          <form id="whatsapp-booking-form" onsubmit="handleWhatsAppBookingSubmit(event, '${programId}')">
             <div class="whatsapp-modal__field">
               <label class="whatsapp-modal__label">الاسم الكامل <span class="whatsapp-modal__required">*</span></label>
               <input type="text" class="whatsapp-modal__input" id="wa-customer-name" placeholder="أدخل اسمك الكامل" required>
@@ -77,7 +77,7 @@ function closeWhatsAppBooking() {
 function handleWhatsAppBookingSubmit(e, programId) {
   e.preventDefault();
 
-  const program = MockData.programs.find(p => p.id === programId);
+  const program = ProgramsService.getById(programId);
   if (!program) return;
 
   const name = document.getElementById('wa-customer-name').value.trim();

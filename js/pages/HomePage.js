@@ -1,6 +1,6 @@
 function renderHomePage() {
   const container = document.getElementById('home-content');
-  const upcomingPrograms = MockData.programs.filter(p => p.status === 'available' || p.status === 'limited');
+  const upcomingPrograms = ProgramsService.getVisible().filter(p => p.status === 'available' || p.status === 'limited' || p.status === 'published');
 
   container.innerHTML = `
     <div class="welcome-section">
@@ -30,7 +30,7 @@ function renderHomePage() {
         <h2 class="section__title">رحلات حسب الوجهة</h2>
       </div>
       <div class="destinations-scroll">
-        ${MockData.destinations.map(d => DestinationCard(d)).join('')}
+        ${ProgramsService.getDestinations().map(d => DestinationCard(d)).join('')}
       </div>
     </div>
 

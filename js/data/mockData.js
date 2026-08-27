@@ -16,7 +16,7 @@ const ProgramStatusLabel = {
 
 const MockData = {
   destinations: [
-    { id: 1, name: "إيران", emoji: "🇮🇷", gradient: "linear-gradient(135deg, #1B3A5C 0%, #2C5F8A 100%)", programCount: 3 }
+    { id: 1, name: "إيران", emoji: "🇮🇷", gradient: "linear-gradient(135deg, #1B3A5C 0%, #2C5F8A 100%)", programCount: 4 }
   ],
 
   tripTypes: [
@@ -46,6 +46,110 @@ const MockData = {
   ],
 
   programs: [
+    {
+      id: 4,
+      name: "كروب ايران جوا (مشهد جواً) - 6 ليالي مشهد",
+      destination: "إيران",
+      destinationEmoji: "🇮🇷",
+      type: "religious",
+      coverImage: "images/iran-jawwa.png",
+      dateDeparture: null,
+      dateReturn: null,
+      dateDisplay: "قريباً",
+      dateReturnDisplay: "قريباً",
+      nights: 6,
+      days: 7,
+      price: 500000,
+      currency: "ج.د",
+      status: ProgramStatus.AVAILABLE,
+      statusText: ProgramStatusLabel.available,
+      emoji: "✈️",
+      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      shortDescription: "برنامج جوي (6 ليالي في مدينة مشهد المقدسة) يشمل زيارة مرقد الإمام الرضا عليه السلام والجولات السياحية في طرقبة وبارك ملت وباغ مشهد مع وقت حر للتسوق",
+      fullDescription: "رحلة سياحية ودينية إلى مدينة مشهد المقدسة تجمع بين زيارة الأماكن المقدسة والجولات السياحية والترفيهية، مع وقت حر للتسوق والاستمتاع بمدينة مشهد. يشمل البرنامج زيارات إلى مرقد الإمام الرضا عليه السلام وطرقبة وجايدراه وحديقة وكيل آباد وحديقة الحيوانات وبارك ملت وباغ مشهد.",
+      includedServices: ["الإقامة في الفنادق", "تنقلات داخلية", "الإرشاد الديني", "الإفطار في الفندق"],
+      excludedServices: ["تذاكر الطيران", "التأمين الصحي", "النفقات الشخصية", "الوجبات الأخرى (تضاف 100 دولار لبوفيه 3 وجبات)"],
+      bookingTerms: "للمزيد من المعلومات الاتصال على الأرقام التالية.",
+      cancellationPolicy: "في حال ترك المسافر الكروب لأي سبب كان لا يتم إرجاع المبلغ له.",
+      highlights: ["زيارة مرقد الإمام علي بن موسى الرضا عليه السلام", "جولة سياحية في طرقبة وجايدراه", "حديقة بارك ملت والمدينة المائية", "باغ مشهد", "مولات وأسواق مشهد", "وقت حر للتسوق"],
+      itinerary: [
+        {
+          day: 1,
+          title: "الوصول إلى مشهد",
+          city: "مشهد",
+          meals: { breakfast: false, lunch: false, dinner: false },
+          visits: ["تسليم الغرف بعد الساعة 2 ظهراً", "زيارة مرقد الإمام علي بن موسى الرضا عليه السلام"],
+          activities: ["الوصول إلى مشهد", "الاستراحة", "التوجه لزيارة مرقد الإمام الرضا عليه السلام"],
+          hotel: null,
+          notes: "تسليم الغرف بعد الساعة 2 ظهراً."
+        },
+        {
+          day: 2,
+          title: "طرقبة والجولة السياحية",
+          city: "مشهد",
+          meals: { breakfast: true, lunch: false, dinner: false },
+          visits: ["طرقبة", "جايدراه", "مطعم عنبران بلبل", "حديقة وكيل آباد", "حديقة الحيوانات"],
+          activities: ["جولة سياحية إلى طرقبة", "زيارة جايدراه والاستمتاع بالألعاب والفعاليات", "تناول الغداء في مطعم عنبران بلبل", "زيارة حديقة وكيل آباد وحديقة الحيوانات"],
+          hotel: null,
+          notes: "جولة سياحية ممتعة."
+        },
+        {
+          day: 3,
+          title: "بارك ملت والمدينة المائية",
+          city: "مشهد",
+          meals: { breakfast: true, lunch: false, dinner: false },
+          visits: ["حديقة بارك ملت", "المدينة المائية"],
+          activities: ["الذهاب إلى حديقة بارك ملت", "الاستمتاع بأجواء الحديقة", "عصراً رحلة اختيارية إلى المدينة المائية"],
+          hotel: null,
+          notes: "رحلة اختيارية إلى المدينة المائية عصراً."
+        },
+        {
+          day: 4,
+          title: "باغ مشهد ووقت حر",
+          city: "مشهد",
+          meals: { breakfast: true, lunch: false, dinner: false },
+          visits: ["باغ مشهد"],
+          activities: ["التوجه إلى باغ مشهد", "الاستمتاع بالمناظر والألعاب", "وقت حر"],
+          hotel: null,
+          notes: "وقت حر للاستراحة أو الاستمتاع بالمدينة."
+        },
+        {
+          day: 5,
+          title: "جولات وتسوق",
+          city: "مشهد",
+          meals: { breakfast: true, lunch: false, dinner: false },
+          visits: ["مولات وأسواق مشهد"],
+          activities: ["جولات في مولات وأسواق مشهد", "وقت مخصص للتسوق وشراء الهدايا"],
+          hotel: null,
+          notes: "وقت مخصص للتسوق."
+        },
+        {
+          day: 6,
+          title: "يوم حر",
+          city: "مشهد",
+          meals: { breakfast: true, lunch: false, dinner: false },
+          visits: [],
+          activities: ["يوم حر بالكامل", "زيارة الأماكن المرغوبة", "التسوق", "زيارة الحرم", "الاستراحة"],
+          hotel: null,
+          notes: "يمكن للمسافر استغلال اليوم حسب رغبته."
+        },
+        {
+          day: 7,
+          title: "المغادرة",
+          city: "مشهد",
+          meals: { breakfast: true, lunch: false, dinner: false },
+          visits: [],
+          activities: ["تسليم الغرف حسب وقت الفندق", "الاستعداد للمغادرة", "التوجه إلى المطار والعودة"],
+          hotel: null,
+          notes: "المغادرة."
+        }
+      ],
+      hotels: [
+        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "بوفيه إفطار", "غرف راقية"] },
+        { name: "فندق بارسيان", stars: 3, city: "مشهد", rating: 3.5, image: null, nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "إفطار", "غرف وصالات واسعة"] },
+        { name: "فندق خاور", stars: 3, city: "مشهد", rating: 3.5, image: null, nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "3 وجبات يومياً"] }
+      ]
+    },
     {
       id: 1,
       name: "كروب ايران البري (قم - مشهد - كاشان)",

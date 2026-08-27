@@ -1,6 +1,6 @@
 function renderBookingFormPage(programId) {
   const container = document.getElementById('booking-form-content');
-  const program = MockData.programs.find(p => p.id === programId);
+  const program = ProgramsService.getById(programId);
 
   if (!program) {
     container.innerHTML = '<div class="auth-page"><div class="auth-page__brand"><h1 class="auth-page__title">البرنامج غير موجود</h1></div></div>';
@@ -13,7 +13,7 @@ function renderBookingFormPage(programId) {
   container.innerHTML = `
     <div class="booking-form-page">
       <div class="profile-page__header">
-        <button class="profile-page__back" onclick="navigateToDetail(${program.id})">
+        <button class="profile-page__back" onclick="navigateToDetail('${program.id}')">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
         <h1 class="profile-page__title">طلب الحجز</h1>
@@ -30,7 +30,7 @@ function renderBookingFormPage(programId) {
         <div class="booking-form__program-price">${program.price.toLocaleString('ar-SA')} ${program.currency}</div>
       </div>
 
-      <form class="booking-form" id="booking-form" onsubmit="handleBookingSubmit(event, ${program.id})">
+      <form class="booking-form" id="booking-form" onsubmit="handleBookingSubmit(event, '${program.id}')">
 
         <div class="booking-form__section">
           <h3 class="booking-form__section-title">📋 بيانات العميل</h3>
@@ -204,7 +204,7 @@ function renderTravelerFields(count) {
 
 async function handleBookingSubmit(e, programId) {
   e.preventDefault();
-  const program = MockData.programs.find(p => p.id === programId);
+  const program = ProgramsService.getById(programId);
   if (!program) return;
 
   const errorEl = document.getElementById('booking-error');

@@ -7,7 +7,7 @@ function ProgramCard(program) {
   const isFav = typeof FavoritesService !== 'undefined' && FavoritesService.isFavorite(program.id);
 
   return `
-    <article class="program-card" data-program-id="${program.id}" onclick="navigateToDetail(${program.id})">
+    <article class="program-card" data-program-id="${program.id}" onclick="navigateToDetail('${program.id}')">
       <div class="program-card__image">
         ${program.coverImage
           ? `<img src="${program.coverImage}" alt="${program.name}">`
@@ -15,7 +15,7 @@ function ProgramCard(program) {
         }
         <span class="program-card__status program-card__status--${statusClass}">${program.statusText}</span>
         <span class="program-card__type-badge">${typeLabels[program.type] || program.type}</span>
-        <button class="program-card__fav ${isFav ? 'program-card__fav--active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${program.id}, this)" aria-label="إضافة للمفضلة">
+        <button class="program-card__fav ${isFav ? 'program-card__fav--active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${program.id}', this)" aria-label="إضافة للمفضلة">
           <svg viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>
       </div>
@@ -41,7 +41,7 @@ function ProgramCard(program) {
             <span class="program-card__price-label">يبدأ من</span>
             <span class="program-card__price-value">${program.price.toLocaleString('ar-SA')} <span class="program-card__price-currency">${program.currency}</span></span>
           </div>
-          <button class="program-card__btn" onclick="event.stopPropagation(); navigateToDetail(${program.id})">عرض البرنامج</button>
+          <button class="program-card__btn" onclick="event.stopPropagation(); navigateToDetail('${program.id}')">عرض البرنامج</button>
         </div>
       </div>
     </article>

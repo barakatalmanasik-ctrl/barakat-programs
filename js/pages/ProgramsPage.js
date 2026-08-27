@@ -39,7 +39,7 @@ function renderProgramsPage() {
 }
 
 function getFilteredPrograms() {
-  let filtered = MockData.programs;
+  let filtered = ProgramsService.getVisible();
 
   if (filterState.search) {
     const q = filterState.search.toLowerCase();

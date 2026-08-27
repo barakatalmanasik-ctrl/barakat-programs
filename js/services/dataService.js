@@ -254,7 +254,7 @@ const OrdersService = {
   createOrder(programId, travelers) {
     const user = AuthService.currentUser;
     if (!user) return { success: false, error: 'يجب تسجيل الدخول أولاً' };
-    const program = MockData.programs.find(p => p.id === programId);
+    const program = ProgramsService.getById(programId);
     if (!program) return { success: false, error: 'البرنامج غير موجود' };
     const order = {
       orderId: 'ORD-' + Date.now().toString().slice(-6),

@@ -18,6 +18,7 @@ async function initApp() {
   }
 
   try {
+    await ProgramsService.init();
     await FavoritesService.init();
     await NotificationsService.init();
     OrdersService.init();

@@ -14,7 +14,7 @@ function FilterBottomSheet() {
             <div class="filter-sheet__group-title">الوجهة</div>
             <div class="filter-sheet__chips" id="filter-destinations">
               <button class="filter-sheet__chip ${filterState.destination === 'all' ? 'active' : ''}" onclick="setFilter('destination', 'all')">الكل</button>
-              ${MockData.destinations.map(d => `
+              ${ProgramsService.getDestinations().map(d => `
                 <button class="filter-sheet__chip ${filterState.destination === d.name ? 'active' : ''}" onclick="setFilter('destination', '${d.name}')">
                   ${d.emoji} ${d.name}
                 </button>

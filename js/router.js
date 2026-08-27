@@ -23,7 +23,7 @@ const Router = {
         this.navigateTo('home');
       }
     } else if (page === 'detail' && parts[1]) {
-      this.navigateTo('detail', parseInt(parts[1]));
+      this.navigateTo('detail', decodeURIComponent(parts[1]));
     } else if (this.subPages.includes(page)) {
       if (this.authRequired.includes(page) && !AuthService.isLoggedIn) {
         window.location.hash = 'login';

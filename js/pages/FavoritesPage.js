@@ -4,7 +4,7 @@ function renderFavoritesPage() {
   if (!user) { navigateToPage('login'); return; }
 
   const favoriteIds = FavoritesService.getAll();
-  const favoritePrograms = MockData.programs.filter(p => favoriteIds.includes(String(p.id)));
+  const favoritePrograms = ProgramsService.getVisible().filter(p => favoriteIds.includes(String(p.id)));
 
   container.innerHTML = `
     <div class="favorites-page">
@@ -30,7 +30,7 @@ function renderFavoritesPage() {
             family: 'عائلية', flight: 'جوية', special: 'خاصة'
           };
           return `
-            <div class="favorites-page__card" onclick="navigateToDetail(${program.id})">
+            <div class="favorites-page__card" onclick="navigateToDetail('${program.id}')">
               <div class="favorites-page__card-image">
                 ${program.coverImage
                   ? `<img src="${program.coverImage}" alt="${program.name}">`
@@ -48,7 +48,7 @@ function renderFavoritesPage() {
                 </div>
                 <div class="favorites-page__card-footer">
                   <span class="favorites-page__card-price">${program.price.toLocaleString('ar-SA')} ${program.currency}</span>
-                  <button class="favorites-page__card-remove" onclick="event.stopPropagation(); removeFavorite(${program.id})">
+                  <button class="favorites-page__card-remove" onclick="event.stopPropagation(); removeFavorite('${program.id}')">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                    إزالة
                   </button>
