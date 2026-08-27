@@ -77,8 +77,13 @@ const ProgramsService = {
       .from('programs')
       .select('*, destinations(id, name, emoji, gradient)');
 
-    if (progError) throw progError;
+    if (progError) {
+      console.error('[ProgramsService] programs query error:', progError.message);
+      throw progError;
+    }
+    console.log('[ProgramsService] programs from Supabase:', programs ? programs.length : 0);
     if (!programs || programs.length === 0) {
+      console.warn('[ProgramsService] EMPTY programs -> LAUNCHING MOCK FALLBACK (this is why booking ids are numeric/non-UUID)');
       this._programs = this._normalizeMock(MockData.programs);
       this._destinations = MockData.destinations;
       this._loaded = true;
