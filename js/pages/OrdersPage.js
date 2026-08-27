@@ -48,7 +48,7 @@ async function renderOrdersPage() {
     const progName = b.programs ? b.programs.name : 'برنامج سياحي';
     const progEmoji = (b.programs && b.programs.emoji) || '🌍';
     const price = Number(b.total_price) || 0;
-    const cur = b.currency || 'ج.د';
+    const cur = b.currency || 'د.ع';
     return `
       <div class="orders-page__card" data-status="${b.status}" onclick="navigateToOrderDetail('${b.id}')" style="cursor:pointer">
         <div class="orders-page__card-header">

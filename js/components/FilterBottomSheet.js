@@ -45,7 +45,7 @@ function FilterBottomSheet() {
           </div>
 
           <div class="filter-sheet__group">
-            <div class="filter-sheet__group-title">نطاق السعر (ر.س)</div>
+            <div class="filter-sheet__group-title">نطاق السعر (د.ع)</div>
             <div class="filter-sheet__chips" id="filter-price">
               ${MockData.priceRanges.map(p => `
                 <button class="filter-sheet__chip ${filterState.price === p.id ? 'active' : ''}" onclick="setFilter('price', '${p.id}')">

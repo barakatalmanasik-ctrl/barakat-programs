@@ -38,7 +38,7 @@ CREATE TABLE programs (
   nights              INTEGER NOT NULL DEFAULT 0,
 
   price               NUMERIC(10,2) NOT NULL DEFAULT 0,
-  currency            TEXT NOT NULL DEFAULT 'SAR',
+  currency            TEXT NOT NULL DEFAULT 'د.ع',
 
   short_description   TEXT,
   full_description    TEXT,

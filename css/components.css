@@ -3545,6 +3545,19 @@
 .bd-card--price { border-top: 3px solid var(--color-primary); }
 
 .bd-support-actions { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+.bd-notes-thread { display: flex; flex-direction: column; gap: 8px; }
+.bd-note {
+  background: #f4f6f8;
+  border: 1px solid #eef2f6;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.bd-note--status { background: #fdfaf5; border-color: #f0e6d8; }
+.bd-note__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 4px; }
+.bd-note__kind { font-weight: 700; }
+.bd-note__author { font-weight: 600; color: var(--color-text-secondary); }
+.bd-note__text { font-size: 14px; line-height: 1.7; color: var(--color-text-primary); white-space: pre-wrap; word-break: break-word; }
 .bd-btn {
   padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-lg);

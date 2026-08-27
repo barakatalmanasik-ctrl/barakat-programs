@@ -155,7 +155,7 @@ function renderAdminDashboard() {
               </div>
               <div class="admin-form__group">
                 <label class="admin-form__label">العملة</label>
-                <input type="text" class="admin-form__input" id="prg-currency" value="ر.س">
+                <input type="text" class="admin-form__input" id="prg-currency" value="د.ع">
               </div>
             </div>
 
@@ -382,7 +382,7 @@ async function showAddProgramForm() {
   document.getElementById('admin-modal-title').textContent = 'إضافة برنامج';
   document.getElementById('prg-id').value = '';
   document.getElementById('admin-program-form').reset();
-  document.getElementById('prg-currency').value = 'ر.س';
+  document.getElementById('prg-currency').value = 'د.ع';
   document.getElementById('prg-status').value = 'draft';
   await loadDestinationsSelect();
   openAdminModal();
@@ -407,7 +407,7 @@ async function showEditProgramForm(id) {
     document.getElementById('prg-days').value = data.days || '';
     document.getElementById('prg-nights').value = data.nights || '';
     document.getElementById('prg-price').value = data.price || '';
-    document.getElementById('prg-currency').value = data.currency || 'ر.س';
+    document.getElementById('prg-currency').value = data.currency || 'د.ع';
     document.getElementById('prg-cover_image').value = data.cover_image || '';
     document.getElementById('prg-short_description').value = data.short_description || '';
     document.getElementById('prg-full_description').value = data.full_description || '';
@@ -540,7 +540,7 @@ function showAdminToast(message, type) {
 
 
 // ============================================================
-// PHASE 5: Support dashboard (���������) + Bookings management
+// PHASE 5: Support dashboard (المحادثات) + Bookings management
 // ============================================================
 
 let _adminConvUnsub = null;
@@ -563,15 +563,15 @@ async function showAdminConversations(filter) {
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-        <h2 class="admin-toolbar__title">���������</h2>
+        <h2 class="admin-toolbar__title">المحادثات</h2>
       </div>
       <div class="admin-conv-filters">
-        ${[['all','����'],['open','������'],['pending','��� ��������'],['resolved','�� ����'],['closed','�����']].map(([k,l]) =>
+        ${[['all','الكل'],['open','مفتوحة'],['pending','قيد المعالجة'],['resolved','تم الحل'],['closed','إغلاق']].map(([k,l]) =>
           `<button class="admin-conv-filter ${_adminConvFilter===k?'admin-conv-filter--active':''}" onclick="showAdminConversations('${k}')">${l}</button>`
         ).join('')}
       </div>
       <div class="admin-conv-list" id="admin-conv-list">
-        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">���� ����� ���������...</div>
+        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">جارٍ تحميل المحادثات...</div>
       </div>
     </div>
   `;
@@ -590,10 +590,10 @@ async function loadAdminConversations() {
 
   if (!convs.length) {
     list.innerHTML = `
-      <div class="admin-empty">
-        <div class="admin-empty__icon">??</div>
-        <div class="admin-empty__title">�� ���� �������</div>
-        <div class="admin-empty__text">����� ���� ������� ��������� ����� ���</div>
+<div class="admin-empty">
+        <div class="admin-empty__icon">💬</div>
+        <div class="admin-empty__title">لا توجد محادثات</div>
+        <div class="admin-empty__text">عند تواصل الزبائن معك ستظهر المحادثات هنا</div>
       </div>
     `;
     return;
@@ -603,7 +603,7 @@ async function loadAdminConversations() {
     const st = getConversationStatusMeta(c.status);
     const cName = c.customer_name || 'عميل';
     const bookingNo = c.booking ? c.booking.order_number : '';
-    const lastMsg = c.lastMessage ? c.lastMessage.message : '�� ���� �����';
+    const lastMsg = c.lastMessage ? c.lastMessage.message : 'لا توجد رسائل بعد';
     const lastTime = c.lastMessage ? c.lastMessage.created_at : c.updated_at;
     return `
       <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="showAdminConversationChat('${c.id}')">
@@ -637,8 +637,8 @@ async function showAdminConversationChat(conversationId) {
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="showAdminConversations()">? ���������</button>
-        <h2 class="admin-toolbar__title">��������</h2>
+<button class="admin-btn admin-btn--outline admin-btn--small" onclick="showAdminConversations()">↩ المحادثات</button>
+        <h2 class="admin-toolbar__title">المحادثة</h2>
       </div>
 
       <div class="admin-chat-meta">
@@ -648,19 +648,19 @@ async function showAdminConversationChat(conversationId) {
       </div>
 
       <div class="admin-chat-status-actions">
-        <button class="admin-btn admin-btn--small ${conv&&conv.status==='open'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','open')">������</button>
-        <button class="admin-btn admin-btn--small ${conv&&conv.status==='pending'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','pending')">��� ��������</button>
-        <button class="admin-btn admin-btn--small ${conv&&conv.status==='resolved'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','resolved')">�� ����</button>
-        <button class="admin-btn admin-btn--small admin-btn--danger ${conv&&conv.status==='closed'?'':''}" onclick="adminSetConvStatus('${conversationId}','closed')">�����</button>
+<button class="admin-btn admin-btn--small ${conv&&conv.status==='open'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','open')">مفتوحة</button>
+        <button class="admin-btn admin-btn--small ${conv&&conv.status==='pending'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','pending')">قيد المعالجة</button>
+        <button class="admin-btn admin-btn--small ${conv&&conv.status==='resolved'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','resolved')">تم الحل</button>
+        <button class="admin-btn admin-btn--small admin-btn--danger ${conv&&conv.status==='closed'?'':''}" onclick="adminSetConvStatus('${conversationId}','closed')">إغلاق</button>
       </div>
 
       <div class="admin-chat-thread" id="admin-chat-thread">
-        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">���� ����� �������...</div>
+        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">جارٍ تحميل الرسائل...</div>
       </div>
 
       <div class="admin-chat-composer">
-        <textarea class="admin-chat-input" id="admin-chat-input" rows="2" placeholder="���� ���..." ${isClosed ? 'disabled' : ''}></textarea>
-        <button class="admin-btn admin-btn--primary" onclick="adminSendReply()" ${isClosed ? 'disabled' : ''}>�����</button>
+<textarea class="admin-chat-input" id="admin-chat-input" rows="2" placeholder="اكتب رسالة..." ${isClosed ? 'disabled' : ''}></textarea>
+        <button class="admin-btn admin-btn--primary" onclick="adminSendReply()" ${isClosed ? 'disabled' : ''}>إرسال</button>
       </div>
     </div>
   `;
@@ -683,12 +683,12 @@ async function loadAdminChatThread(conversationId) {
       <div class="admin-chat-msg__bubble">
         <div class="admin-chat-msg__text">${escapeHtml(m.message)}</div>
         <div class="admin-chat-msg__meta">
-          ${m.sender_id === meId ? (m.read_at ? '??' : '?') : `�� ${m.sender_role === 'customer' ? '������' : '������'}`}
-          � ${formatChatTime(m.created_at)}
+${m.sender_id === meId ? (m.read_at ? '✓' : '○') : `· ${m.sender_role === 'customer' ? 'الزبون' : 'الموظف'}`}
+          · ${formatChatTime(m.created_at)}
         </div>
       </div>
     </div>
-  `).join('') || '<div class="admin-empty" style="padding:30px">�� ���� ����� ���</div>';
+  `).join('') || '<div class="admin-empty" style="padding:30px">لا توجد رسائل بعد</div>';
 
   thread.scrollTop = thread.scrollHeight;
 }
@@ -716,36 +716,47 @@ async function adminSetConvStatus(conversationId, status) {
 
 function getConversationStatusMeta(status) {
   const map = {
-    open: { label: '������' }, pending: { label: '��� ��������' },
-    resolved: { label: '�� ����' }, closed: { label: '�����' }
+open: { label: 'مفتوحة' }, pending: { label: 'قيد المعالجة' },
+    resolved: { label: 'تم الحل' }, closed: { label: 'إغلاق' }
   };
   return map[status] || { label: status };
 }
 
-async function showAdminBookings() {
+let _adminBookingFilter = 'all';
+let _adminActiveBookingId = null;
+
+async function showAdminBookings(filter) {
   _adminSetActiveNav('admin-nav-bookings');
+  _adminBookingFilter = filter || _adminBookingFilter || 'all';
+
   const content = document.getElementById('admin-main-content');
   if (!content) return;
 
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-        <h2 class="admin-toolbar__title">��������</h2>
+        <h2 class="admin-toolbar__title">الحجوزات</h2>
+      </div>
+      <div class="admin-conv-filters">
+        ${[['all','الكل'],['pending','قيد المراجعة'],['reviewing','قيد المعالجة'],['confirmed','مؤكد'],['completed','مكتمل'],['cancelled','ملغي']].map(([k,l]) =>
+          `<button class="admin-conv-filter ${_adminBookingFilter===k?'admin-conv-filter--active':''}" onclick="showAdminBookings('${k}')">${l}</button>`
+        ).join('')}
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
             <tr>
-              <th>��� �����</th>
-              <th>������</th>
-              <th>������</th>
-              <th>���������</th>
-              <th>������</th>
-              <th>�������</th>
+              <th>رقم الطلب</th>
+              <th>العميل</th>
+              <th>البرنامج</th>
+              <th>الحالة</th>
+              <th>المسافرون</th>
+              <th>المبلغ</th>
+              <th>التاريخ</th>
             </tr>
           </thead>
           <tbody id="admin-bookings-tbody">
-            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--color-text-tertiary)">���� �������...</td></tr>
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--color-text-tertiary)">جارٍ تحميل الحجوزات...</td></tr>
           </tbody>
         </table>
       </div>
@@ -758,34 +769,253 @@ async function loadAdminBookings() {
   const tbody = document.getElementById('admin-bookings-tbody');
   if (!tbody) return;
   try {
-    const { data, error } = await SupabaseClient
+    let query = SupabaseClient
       .from('bookings')
-      .select('id, order_number, status, travelers_count, total_price, currency, created_at, customer_name, user_id')
+      .select('id, order_number, status, travelers_count, total_price, currency, created_at, customer_name, user_id, program_id')
       .order('created_at', { ascending: false })
       .limit(200);
+    if (_adminBookingFilter && _adminBookingFilter !== 'all') {
+      query = query.eq('status', _adminBookingFilter);
+    }
+    const { data, error } = await query;
     if (error) throw error;
 
     if (!data || !data.length) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><div class="admin-empty__icon">??</div><div class="admin-empty__title">�� ���� ������</div></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><div class="admin-empty__icon">📋</div><div class="admin-empty__title">لا توجد حجوزات${_adminBookingFilter && _adminBookingFilter !== 'all' ? ' بهذه الحالة' : ' حالياً'}</div></div></td></tr>`;
       return;
     }
 
+    let progMap = {};
+    try {
+      const progIds = [...new Set(data.map(b => b.program_id).filter(Boolean))];
+      if (progIds.length) {
+        const { data: progs } = await SupabaseClient.from('programs').select('id, name, emoji').in('id', progIds);
+        (progs || []).forEach(p => { progMap[p.id] = p; });
+      }
+    } catch (e) {}
+
     tbody.innerHTML = data.map(b => {
       const st = getBookingStatusMeta(b.status);
+      const prog = progMap[b.program_id];
       return `
-        <tr>
+        <tr class="admin-booking-row" onclick="showAdminBookingDetail('${b.id}')">
           <td><strong dir="ltr">${b.order_number}</strong></td>
-          <td>${escapeHtml(b.customer_name || '����')}</td>
+          <td>${escapeHtml(b.customer_name || 'زائر')}</td>
+          <td>${prog ? `${prog.emoji || ''} ${escapeHtml(prog.name)}` : '-'}</td>
           <td><span class="admin-table__status" style="color:${st.color};background:${st.color}15">${st.label}</span></td>
           <td>${b.travelers_count}</td>
-          <td>${(Number(b.total_price)||0).toLocaleString('ar-SA')} ${b.currency || '�.�'}</td>
+          <td>${(Number(b.total_price)||0).toLocaleString('ar-SA')} ${b.currency || 'د.ع'}</td>
           <td>${formatDateShort(b.created_at)}</td>
         </tr>
       `;
     }).join('');
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><div class="admin-empty__icon">??</div><div class="admin-empty__title">${escapeHtml(e.message)}</div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><div class="admin-empty__icon">⚠️</div><div class="admin-empty__title">${escapeHtml(e.message)}</div></div></td></tr>`;
   }
+}
+
+async function showAdminBookingDetail(bookingId) {
+  _adminSetActiveNav('admin-nav-bookings');
+  const content = document.getElementById('admin-main-content');
+  if (!content) return;
+
+  content.innerHTML = `
+    <div class="admin-panel">
+      <div class="admin-toolbar">
+        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="showAdminBookings()">↩ الحجوزات</button>
+        <h2 class="admin-toolbar__title">تفاصيل الحجز</h2>
+      </div>
+      <div id="admin-booking-detail">
+        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">جارٍ تحميل تفاصيل الحجز...</div>
+      </div>
+    </div>
+  `;
+
+  try {
+    const { data: booking, error } = await SupabaseClient
+      .from('bookings')
+      .select('*, booking_travelers(*)')
+      .eq('id', bookingId)
+      .single();
+    if (error) throw error;
+
+    let prog = null;
+    let dest = null;
+    try {
+      const { data: p } = await SupabaseClient.from('programs').select('*').eq('id', booking.program_id).single();
+      prog = p || null;
+      if (prog && prog.destination_id) {
+        const { data: d } = await SupabaseClient.from('destinations').select('name, emoji').eq('id', prog.destination_id).single();
+        dest = d || null;
+      }
+    } catch (e) {}
+
+    renderAdminBookingDetail(booking, prog, dest);
+  } catch (e) {
+    const el = document.getElementById('admin-booking-detail');
+    if (el) el.innerHTML = `<div class="admin-empty"><div class="admin-empty__icon">⚠️</div><div class="admin-empty__title">${escapeHtml(e.message)}</div></div>`;
+  }
+}
+
+function renderAdminBookingDetail(booking, prog, dest) {
+  _adminActiveBookingId = booking.id;
+  const el = document.getElementById('admin-booking-detail');
+  if (!el) return;
+
+  const st = getBookingStatusMeta(booking.status);
+  const travelers = (booking.booking_travelers || []).slice().sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  const waNum = booking.customer_phone ? String(booking.customer_phone).replace(/\D/g, '') : '';
+
+  const statusLabels = ['pending','reviewing','confirmed','completed','cancelled'];
+  const statusBtnHtml = statusLabels.map(s => {
+    const m = getBookingStatusMeta(s);
+    const active = booking.status === s;
+    const danger = s === 'cancelled';
+    const cls = active
+      ? (danger ? 'admin-btn--danger' : 'admin-btn--primary')
+      : 'admin-btn--outline';
+    return `<button class="admin-btn admin-btn--small ${cls}" onclick="adminUpdateBookingStatus('${booking.id}','${s}')">${active ? '✓ ' : ''}${m.icon} ${m.label}</button>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="admin-booking-header">
+      <div>
+        <div class="admin-booking-header__no" dir="ltr">${booking.order_number}</div>
+        <div class="admin-booking-header__date">أنشئ في ${formatDateShort(booking.created_at)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="admin-table__status" style="color:${st.color};background:${st.color}15;font-size:13px;padding:6px 14px">${st.icon} ${st.label}</span>
+        ${waNum ? `<a class="admin-btn admin-btn--small admin-btn--success" target="_blank" rel="noopener" href="https://wa.me/${waNum}">واتساب</a>` : ''}
+      </div>
+    </div>
+
+    <div class="admin-booking-grid">
+      <div class="admin-booking-card">
+        <div class="admin-booking-card__title">👤 معلومات العميل</div>
+        <div class="admin-booking-rows">
+          <div class="admin-booking-row"><span>الاسم</span><strong>${escapeHtml(booking.customer_name || '—')}</strong></div>
+          <div class="admin-booking-row"><span>رقم الهاتف</span><strong dir="ltr">${booking.customer_phone ? `<a href="tel:${escapeHtml(booking.customer_phone)}">${escapeHtml(booking.customer_phone)}</a>` : '—'}</strong></div>
+          <div class="admin-booking-row"><span>البريد</span><strong dir="ltr" style="font-size:12px">${booking.customer_email ? escapeHtml(booking.customer_email) : '—'}</strong></div>
+          <div class="admin-booking-row"><span>المدينة</span><strong>${escapeHtml(booking.customer_city || '—')}</strong></div>
+          <div class="admin-booking-row"><span>النوع</span><strong>${booking.user_id ? 'عميل مسجل' : 'زائر (بدون حساب)'}</strong></div>
+        </div>
+      </div>
+
+      <div class="admin-booking-card">
+        <div class="admin-booking-card__title">✈️ البرنامج</div>
+        ${prog ? `
+          <div class="admin-booking-prog__name">${prog.emoji || ''} ${escapeHtml(prog.name)}</div>
+          <div class="admin-booking-rows">
+            <div class="admin-booking-row"><span>الوجهة</span><strong>${dest ? `${dest.emoji || ''} ${escapeHtml(dest.name)}` : '-'}</strong></div>
+            <div class="admin-booking-row"><span>الانطلاق</span><strong>${prog.date_departure ? formatDateShort(prog.date_departure) : '-'}</strong></div>
+            <div class="admin-booking-row"><span>العودة</span><strong>${prog.date_return ? formatDateShort(prog.date_return) : '-'}</strong></div>
+            <div class="admin-booking-row"><span>المدة</span><strong>${prog.days ? prog.days + ' يوم' : '-'}${prog.nights ? ' / ' + prog.nights + ' ليلة' : ''}</strong></div>
+            <div class="admin-booking-row"><span>سعر البرنامج</span><strong>${(Number(prog.price) || 0).toLocaleString('ar-SA')} ${prog.currency || 'د.ع'}</strong></div>
+          </div>` : `
+          <div class="admin-booking-row"><span>البرنامج</span><strong>—</strong></div>`}
+      </div>
+
+      <div class="admin-booking-card">
+        <div class="admin-booking-card__title">🧾 تفاصيل الحجز</div>
+        <div class="admin-booking-rows">
+          <div class="admin-booking-row"><span>عدد المسافرين</span><strong>${booking.travelers_count}</strong></div>
+          <div class="admin-booking-row"><span>الغرف</span><strong>${booking.rooms_count || 1}</strong></div>
+          <div class="admin-booking-row"><span>نوع الغرفة</span><strong>${escapeHtml(booking.room_type || '—')}</strong></div>
+          <div class="admin-booking-row admin-booking-row--total"><span>إجمالي المبلغ</span><strong>${(Number(booking.total_price) || 0).toLocaleString('ar-SA')} ${booking.currency || 'د.ع'}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-booking-card">
+      <div class="admin-booking-card__title">👥 المسافرون (${travelers.length})</div>
+      ${travelers.length ? `
+        <div class="admin-travelers">
+          ${travelers.map((t, i) => `
+            <div class="admin-traveler">
+              <div class="admin-traveler__num">${i + 1}</div>
+              <div class="admin-traveler__body">
+                <div class="admin-traveler__name">${escapeHtml(t.full_name)}</div>
+                <div class="admin-traveler__meta">
+                  ${t.phone ? `<span dir="ltr">📞 ${escapeHtml(t.phone)}</span>` : ''}
+                  ${t.nationality ? `<span>🌍 ${escapeHtml(t.nationality)}</span>` : ''}
+                  ${t.passport_number ? `<span dir="ltr">🛂 ${escapeHtml(t.passport_number)}</span>` : ''}
+                  ${t.date_of_birth ? `<span>🎂 ${formatDateShort(t.date_of_birth)}</span>` : ''}
+                  ${t.notes ? `<span>📝 ${escapeHtml(t.notes)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>` : '<div class="admin-booking-row"><strong>لا توجد بيانات مسافرين</strong></div>'}
+    </div>
+
+    ${booking.customer_notes ? `
+    <div class="admin-booking-card">
+      <div class="admin-booking-card__title">📝 ملاحظات العميل</div>
+      <div class="admin-booking-notes applicant">${escapeHtml(booking.customer_notes)}</div>
+    </div>` : ''}
+
+    <div class="admin-booking-card">
+      <div class="admin-booking-card__title">💬 سجل الردود ومراجعة الطلب</div>
+      <div class="admin-booking-actions">
+        <span class="admin-booking-actions__label">حالة الطلب:</span>
+        ${statusBtnHtml}
+      </div>
+      <div class="admin-notes-thread">
+        ${bookingNotesToHtml(booking.employee_notes) || '<div class="admin-notes-empty">لا توجد ردود بعد — اكتب أول رد للعميل بالأسفل</div>'}
+      </div>
+      <div class="admin-chat-composer">
+        <textarea class="admin-chat-input" id="admin-booking-reply-input" rows="2" placeholder="اكتب ردك للعميل هنا..."></textarea>
+        <button class="admin-btn admin-btn--primary" onclick="adminReplyToBooking('${booking.id}')">إرسال الرد</button>
+      </div>
+    </div>
+  `;
+}
+
+async function adminUpdateBookingStatus(bookingId, status) {
+  const meta = getBookingStatusMeta(status);
+  try {
+    const { data: cur, error: ce } = await SupabaseClient.from('bookings').select('employee_notes').eq('id', bookingId).single();
+    if (ce) throw ce;
+    const entry = buildBookingNoteEntry('status', '', meta.label);
+    const notes = [entry, (cur && cur.employee_notes)].filter(Boolean).join('\n---\n');
+    const { error } = await SupabaseClient
+      .from('bookings')
+      .update({ status, employee_notes: notes, updated_at: new Date().toISOString() })
+      .eq('id', bookingId);
+    if (error) throw error;
+    showAdminToast('تم تحديث حالة الطلب إلى «' + meta.label + '»', 'success');
+  } catch (e) {
+    showAdminToast(e.message || 'تعذر تحديث حالة الطلب', 'error');
+  }
+  await showAdminBookingDetail(bookingId);
+}
+
+async function adminReplyToBooking(bookingId) {
+  const input = document.getElementById('admin-booking-reply-input');
+  const text = input ? input.value.trim() : '';
+  if (!text) {
+    showAdminToast('اكتب نص الرد أولاً', 'error');
+    return;
+  }
+
+  const staffName = AuthService.currentUser ? (AuthService.currentUser.name || 'الإدارة') : 'الإدارة';
+  try {
+    const { data: cur, error: ce } = await SupabaseClient.from('bookings').select('employee_notes, status').eq('id', bookingId).single();
+    if (ce) throw ce;
+    const entry = buildBookingNoteEntry('reply', staffName, text);
+    const notes = [entry, (cur && cur.employee_notes)].filter(Boolean).join('\n---\n');
+
+    const patch = { employee_notes: notes, updated_at: new Date().toISOString() };
+    // Moving a fresh request into "reviewing" when staff replies shows progress to the customer.
+    if (cur && cur.status === 'pending') patch.status = 'reviewing';
+
+    const { error } = await SupabaseClient.from('bookings').update(patch).eq('id', bookingId);
+    if (error) throw error;
+    showAdminToast('تم إرسال الرد للعميل', 'success');
+  } catch (e) {
+    showAdminToast(e.message || 'تعذر إرسال الرد', 'error');
+  }
+  await showAdminBookingDetail(bookingId);
 }
 
 function formatDateShort(iso) {

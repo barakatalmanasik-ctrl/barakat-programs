@@ -17,6 +17,36 @@ function getBookingStatusMeta(status) {
   return BookingStatusMap[status] || BookingStatusMap.pending;
 }
 
+// Shared helpers for the employee_notes thread (admin replies + status log).
+// Each entry is stored as: [ISO] type|author|body , entries separated by "\n---\n".
+
+function _fmtNoteTime(iso) {
+  try {
+    return new Date(iso).toLocaleString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return ''; }
+}
+
+function buildBookingNoteEntry(type, author, body) {
+  return '[' + new Date().toISOString() + '] ' + type + '|' + (author || '') + '|' + String(body || '').replace(/\s*\n+\s*/g, ' ');
+}
+
+function bookingNotesToHtml(raw) {
+  if (!raw || !String(raw).trim()) return '';
+  const labels = { reply: '✍️ رد الإدارة', status: '🔄 تحديث الحالة', system: '📝 ملاحظة' };
+  const entries = String(raw).split(/\n-{3,}\n/).map(s => s.trim()).filter(Boolean);
+  return entries.map(ln => {
+    const m = ln.match(/^\[([^\]]+)\]\s+(\w+)\|([^|]*)\|([\s\S]*)$/);
+    const ts = m ? _fmtNoteTime(m[1]) : '';
+    const type = m ? m[2] : 'system';
+    const author = m ? m[3] : '';
+    const text = m ? m[4] : ln;
+    const meta = ['<span class="bd-note__kind">' + (labels[type] || 'ملاحظة') + '</span>', author ? '<span class="bd-note__author">' + escapeHtml(author) + '</span>' : '', ts ? '<span class="bd-note__time">' + ts + '</span>' : ''].filter(Boolean).join(' ');
+    return (type === 'status'
+      ? '<div class="bd-note bd-note--status"><span class="bd-note__meta">' + meta + '</span><span class="bd-note__text">' + escapeHtml(text) + '</span></div>'
+      : '<div class="bd-note"><span class="bd-note__meta">' + meta + '</span><span class="bd-note__text">' + escapeHtml(text) + '</span></div>');
+  }).join('');
+}
+
 async function renderBookingDetailPage(bookingId) {
   const container = document.getElementById('booking-detail-content');
   if (!container) return;
@@ -56,7 +86,7 @@ async function renderBookingDetailPage(bookingId) {
   const status = getBookingStatusMeta(booking.status);
 
   const price = Number(booking.total_price) || 0;
-  const currency = booking.currency || 'ج.د';
+  const currency = booking.currency || 'د.ع';
   // No payments table in this phase; remaining = total.
   const remaining = price;
 
@@ -110,6 +140,14 @@ async function renderBookingDetailPage(bookingId) {
     <div class="bd-card">
       <div class="bd-card__title">📝 ملاحظاتك</div>
       <div class="bd-card__sub">${booking.customer_notes}</div>
+    </div>
+    ` : ''}
+
+    ${booking.employee_notes ? `
+    <div class="bd-card">
+      <div class="bd-card__title">💬 ردود الإدارة ومراجعة الطلب</div>
+      <div class="bd-notes-thread">${bookingNotesToHtml(booking.employee_notes)}</div>
+      <div class="bd-card__sub" style="margin-top:10px">تابع حالة طلبك هنا — يقوم فريقنا بالرد عليك وتحديث حالة الحجز من هذه الصفحة</div>
     </div>
     ` : ''}
 

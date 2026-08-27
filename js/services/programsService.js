@@ -73,9 +73,14 @@ const ProgramsService = {
   async _loadFromSupabase() {
     const supabase = SupabaseClient;
 
+    // Read programs WITHOUT the embedded destinations join. The join can fail /
+    // return zero via RLS on the related table and silently drop us into the
+    // Mock fallback (showing fake programs that can't be booked). Reading the
+    // tables separately keeps every real program alive even if a related table
+    // denies access. Destinations are merged afterwards.
     const { data: programs, error: progError } = await supabase
       .from('programs')
-      .select('*, destinations(id, name, emoji, gradient)');
+      .select('*');
 
     if (progError) {
       console.error('[ProgramsService] programs query error:', progError.message);
@@ -88,6 +93,15 @@ const ProgramsService = {
       this._destinations = MockData.destinations;
       this._loaded = true;
       return;
+    }
+
+    // Load destinations separately (tolerant: fall back to mock dest list if fail).
+    let destMap = {};
+    try {
+      const { data: dests } = await SupabaseClient.from('destinations').select('id, name, emoji, gradient');
+      (dests || []).forEach(d => { destMap[d.id] = d; });
+    } catch (e) {
+      console.error('[ProgramsService] destinations load error (continuing):', e);
     }
 
     // Load program_days + hotels for itinerary/hotels enrichment
@@ -116,7 +130,7 @@ const ProgramsService = {
     (MockData.programs || []).forEach(m => { mockByName[m.name] = m; });
 
     this._programs = programs.map(p => {
-      const dest = p.destinations || {};
+      const dest = destMap[p.destination_id] || {};
       const norm = {
         id: p.id,
         name: p.name,
@@ -127,7 +141,7 @@ const ProgramsService = {
         statusText: this._statusTextMap[p.status] || 'متاح',
         coverImage: p.cover_image,
         emoji: p.emoji,
-        gradient: p.gradient || dest.gradient,
+        gradient: p.gradient || dest.gradient || undefined,
         dateDeparture: p.date_departure,
         dateReturn: p.date_return,
         dateDisplay: p.date_display || (p.date_departure ? this._fmtDate(p.date_departure) : 'قريباً'),
@@ -135,7 +149,7 @@ const ProgramsService = {
         days: p.days,
         nights: p.nights,
         price: Number(p.price) || 0,
-        currency: p.currency || 'ج.د',
+        currency: p.currency || 'د.ع',
         shortDescription: p.short_description,
         fullDescription: p.full_description,
         includedServices: p.included_services || [],

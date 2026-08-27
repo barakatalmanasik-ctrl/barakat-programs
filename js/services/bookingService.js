@@ -26,7 +26,7 @@ const BookingService = {
         status: 'pending',
         travelers_count: bookingData.travelersCount,
         total_price: bookingData.totalPrice,
-        currency: bookingData.currency || 'SAR',
+        currency: bookingData.currency || 'د.ع',
         customer_notes: bookingData.notes || '',
         customer_name: bookingData.customerName,
         customer_phone: bookingData.customerPhone,

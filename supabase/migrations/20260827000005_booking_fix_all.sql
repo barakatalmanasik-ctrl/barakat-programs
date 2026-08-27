@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   status            booking_status NOT NULL DEFAULT 'pending',
   travelers_count   INTEGER NOT NULL DEFAULT 1 CHECK (travelers_count > 0),
   total_price       NUMERIC(10,2) NOT NULL DEFAULT 0,
-  currency          TEXT NOT NULL DEFAULT 'ج.د',
+  currency          TEXT NOT NULL DEFAULT 'د.ع',
   customer_notes    TEXT DEFAULT '',
   employee_notes    TEXT DEFAULT '',
   assigned_employee UUID REFERENCES profiles(id) ON DELETE SET NULL,
