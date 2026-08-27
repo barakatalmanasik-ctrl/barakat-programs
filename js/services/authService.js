@@ -75,9 +75,21 @@ const AuthService = {
         .from('profiles')
         .select('id, full_name, phone, email, avatar_url, role, created_at')
         .eq('id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        console.warn('Profile row not found for user', authUser.id);
+        this._user = {
+          id: authUser.id,
+          name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
+          email: authUser.email,
+          phone: authUser.user_metadata?.phone || null,
+          createdAt: authUser.created_at
+        };
+        this._notify();
+        return;
+      }
 
       this._user = {
         id: data.id,
@@ -234,12 +246,13 @@ const AuthService = {
       }
 
       // Refresh profile
-      const { data: profile } = await SupabaseClient
+      const { data: profile, error: profileError } = await SupabaseClient
         .from('profiles')
         .select('id, full_name, phone, email, avatar_url, role, created_at')
         .eq('id', this._user.id)
-        .single();
+        .maybeSingle();
 
+      if (profileError) throw profileError;
       if (profile) {
         this._user = {
           id: profile.id,
