@@ -4,7 +4,7 @@ function renderFavoritesPage() {
   if (!user) { navigateToPage('login'); return; }
 
   const favoriteIds = FavoritesService.getAll();
-  const favoritePrograms = MockData.programs.filter(p => favoriteIds.includes(p.id));
+  const favoritePrograms = MockData.programs.filter(p => favoriteIds.includes(String(p.id)));
 
   container.innerHTML = `
     <div class="favorites-page">
