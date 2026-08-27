@@ -1,0 +1,23 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      ".git/**",
+      "**/node_modules/**",
+      "barakat-app/**",
+      "supabase/**",
+      "vercel.json",
+      ".gitignore",
+      ".env.example",
+      "*.md"
+    ],
+    "rewrites": [
+      {
+        "source": "/admin/**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

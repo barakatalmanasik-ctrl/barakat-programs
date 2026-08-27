@@ -30,3 +30,6 @@ Thumbs.db
 
 # Barakat-app (separate React prototype - not part of main project)
 barakat-app/
+
+# Firebase local cache/auth (never commit tokens)
+.firebase/

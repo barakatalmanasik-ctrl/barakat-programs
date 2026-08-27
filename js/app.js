@@ -18,8 +18,8 @@ async function initApp() {
   }
 
   try {
-    FavoritesService.init();
-    NotificationsService.init();
+    await FavoritesService.init();
+    await NotificationsService.init();
     OrdersService.init();
   } catch (e) {
     console.error('Service initialization error:', e);
@@ -48,9 +48,16 @@ async function initApp() {
     }
   });
 
-  AuthService.onChange(() => {
+  AuthService.onChange(async (user) => {
     renderMorePage();
     renderHeader();
+    if (user) {
+      // Re-sync Supabase data when a user signs in/refreshes session
+      try {
+        await FavoritesService.syncFromServer();
+        await NotificationsService.syncFromServer();
+      } catch (e) { console.error('Auth-sync error:', e); }
+    }
   });
 }
 
