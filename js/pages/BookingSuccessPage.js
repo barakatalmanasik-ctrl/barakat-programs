@@ -37,9 +37,9 @@ function renderBookingSuccessPage(orderNumber) {
           <button class="booking-success__btn booking-success__btn--primary" onclick="navigateToPage('home')">
             العودة إلى الصفحة الرئيسية
           </button>
-          <a href="https://wa.me/966500000000" target="_blank" class="booking-success__btn booking-success__btn--whatsapp">
-            💬 التواصل مع الشركة
-          </a>
+          <button class="booking-success__btn booking-success__btn--secondary" onclick="navigateToPage('orders')">
+            📋 عرض حجوزاتي
+          </button>
         </div>
       </div>
     </div>

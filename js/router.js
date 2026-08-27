@@ -1,8 +1,8 @@
 const Router = {
   currentPage: 'home',
   currentDetailId: null,
-  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login'],
-  authRequired: ['profile', 'orders', 'notifications', 'favorites'],
+  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login', 'booking', 'booking-success', 'booking-detail', 'chat'],
+  authRequired: ['profile', 'orders', 'notifications', 'favorites', 'booking-detail', 'chat'],
 
   init() {
     this.handleHashChange();
@@ -24,6 +24,16 @@ const Router = {
       }
     } else if (page === 'detail' && parts[1]) {
       this.navigateTo('detail', decodeURIComponent(parts[1]));
+    } else if (page === 'booking' && parts[1]) {
+      this.navigateToSub('booking', decodeURIComponent(parts[1]));
+    } else if (page === 'booking-success' && parts[1]) {
+      this.navigateToSub('booking-success', decodeURIComponent(parts[1]));
+    } else if (page === 'booking-detail' && parts[1]) {
+      if (!AuthService.isLoggedIn) { window.location.hash = 'login'; return; }
+      this.navigateToSub('booking-detail', parts[1]);
+    } else if (page === 'chat' && parts[1]) {
+      if (!AuthService.isLoggedIn) { window.location.hash = 'login'; return; }
+      this.navigateToSub('chat', parts[1]);
     } else if (this.subPages.includes(page)) {
       if (this.authRequired.includes(page) && !AuthService.isLoggedIn) {
         window.location.hash = 'login';
@@ -114,6 +124,10 @@ const Router = {
       case 'notifications': renderNotificationsPage(); break;
       case 'favorites': renderFavoritesPage(); break;
       case 'admin/login': renderAdminLoginPage(); break;
+      case 'booking': renderBookingFormPage(param); break;
+      case 'booking-success': renderBookingSuccessPage(param); break;
+      case 'booking-detail': renderBookingDetailPage(param); break;
+      case 'chat': renderChatPage(param); break;
     }
   },
 

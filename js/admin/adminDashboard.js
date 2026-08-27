@@ -10,9 +10,17 @@ function renderAdminDashboard() {
           <div class="admin-sidebar__brand-sub">لوحة التحكم</div>
         </div>
         <nav class="admin-sidebar__nav">
-          <a class="admin-sidebar__link admin-sidebar__link--active" href="#admin/dashboard">
+          <a class="admin-sidebar__link admin-sidebar__link--active" href="#admin/dashboard" id="admin-nav-dashboard">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             لوحة التحكم
+          </a>
+          <a class="admin-sidebar__link" href="#" id="admin-nav-conversations" onclick="showAdminConversations(); return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            المحادثات
+          </a>
+          <a class="admin-sidebar__link" href="#" id="admin-nav-bookings" onclick="showAdminBookings(); return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            الحجوزات
           </a>
         </nav>
       </aside>
@@ -528,4 +536,260 @@ function showAdminToast(message, type) {
     toast.classList.remove('admin-toast--visible');
     setTimeout(() => toast.remove(), 300);
   }, 3000);
+}
+
+
+// ============================================================
+// PHASE 5: Support dashboard (���������) + Bookings management
+// ============================================================
+
+let _adminConvUnsub = null;
+let _adminConvFilter = 'all';
+let _adminActiveConvId = null;
+
+function _adminSetActiveNav(id) {
+  document.querySelectorAll('.admin-sidebar__link').forEach(l => l.classList.remove('admin-sidebar__link--active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('admin-sidebar__link--active');
+}
+
+async function showAdminConversations(filter) {
+  _adminSetActiveNav('admin-nav-conversations');
+  _adminConvFilter = filter || _adminConvFilter || 'all';
+
+  const content = document.getElementById('admin-main-content');
+  if (!content) return;
+
+  content.innerHTML = `
+    <div class="admin-panel">
+      <div class="admin-toolbar">
+        <h2 class="admin-toolbar__title">���������</h2>
+      </div>
+      <div class="admin-conv-filters">
+        ${[['all','����'],['open','������'],['pending','��� ��������'],['resolved','�� ����'],['closed','�����']].map(([k,l]) =>
+          `<button class="admin-conv-filter ${_adminConvFilter===k?'admin-conv-filter--active':''}" onclick="showAdminConversations('${k}')">${l}</button>`
+        ).join('')}
+      </div>
+      <div class="admin-conv-list" id="admin-conv-list">
+        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">���� ����� ���������...</div>
+      </div>
+    </div>
+  `;
+
+  if (_adminConvUnsub) { _adminConvUnsub(); _adminConvUnsub = null; }
+  _adminConvUnsub = ChatService.subscribeToConversations(() => loadAdminConversations());
+
+  await loadAdminConversations();
+}
+
+async function loadAdminConversations() {
+  const list = document.getElementById('admin-conv-list');
+  if (!list) return;
+
+  const convs = await ChatService.getConversations(_adminConvFilter);
+
+  if (!convs.length) {
+    list.innerHTML = `
+      <div class="admin-empty">
+        <div class="admin-empty__icon">??</div>
+        <div class="admin-empty__title">�� ���� �������</div>
+        <div class="admin-empty__text">����� ���� ������� ��������� ����� ���</div>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = convs.map(c => {
+    const st = getConversationStatusMeta(c.status);
+    const cName = c.customer_name || 'عميل';
+    const bookingNo = c.booking ? c.booking.order_number : '';
+    const lastMsg = c.lastMessage ? c.lastMessage.message : '�� ���� �����';
+    const lastTime = c.lastMessage ? c.lastMessage.created_at : c.updated_at;
+    return `
+      <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="showAdminConversationChat('${c.id}')">
+        <div class="admin-conv-avatar">${(cName).charAt(0)}</div>
+        <div class="admin-conv-body">
+          <div class="admin-conv-top">
+            <span class="admin-conv-name">${escapeHtml(cName)}</span>
+            ${bookingNo ? `<span class="admin-conv-booking" dir="ltr">${bookingNo}</span>` : ''}
+          </div>
+          <div class="admin-conv-last">${escapeHtml(lastMsg)}</div>
+          <div class="admin-conv-sub">
+            <span class="admin-conv-time">${formatChatTime(lastTime)}</span>
+            <span class="admin-conv-status admin-conv-status--${c.status}">${st.label}</span>
+          </div>
+        </div>
+        ${c.unreadCount > 0 ? `<span class="admin-conv-badge">${c.unreadCount}</span>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+async function showAdminConversationChat(conversationId) {
+  _adminActiveConvId = conversationId;
+  const content = document.getElementById('admin-main-content');
+  if (!content) return;
+
+  const conv = await ChatService.getConversationById(conversationId);
+  const st = getConversationStatusMeta(conv ? conv.status : 'open');
+  const isClosed = conv && conv.status === 'closed';
+
+  content.innerHTML = `
+    <div class="admin-panel">
+      <div class="admin-toolbar">
+        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="showAdminConversations()">? ���������</button>
+        <h2 class="admin-toolbar__title">��������</h2>
+      </div>
+
+      <div class="admin-chat-meta">
+        <span class="admin-conv-status admin-conv-status--${conv ? conv.status : 'open'}">${st.label}</span>
+        ${conv && conv.subject ? `<span>${escapeHtml(conv.subject)}</span>` : ''}
+        ${conv && conv.booking ? `<span dir="ltr">${conv.booking.order_number}</span>` : ''}
+      </div>
+
+      <div class="admin-chat-status-actions">
+        <button class="admin-btn admin-btn--small ${conv&&conv.status==='open'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','open')">������</button>
+        <button class="admin-btn admin-btn--small ${conv&&conv.status==='pending'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','pending')">��� ��������</button>
+        <button class="admin-btn admin-btn--small ${conv&&conv.status==='resolved'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','resolved')">�� ����</button>
+        <button class="admin-btn admin-btn--small admin-btn--danger ${conv&&conv.status==='closed'?'':''}" onclick="adminSetConvStatus('${conversationId}','closed')">�����</button>
+      </div>
+
+      <div class="admin-chat-thread" id="admin-chat-thread">
+        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">���� ����� �������...</div>
+      </div>
+
+      <div class="admin-chat-composer">
+        <textarea class="admin-chat-input" id="admin-chat-input" rows="2" placeholder="���� ���..." ${isClosed ? 'disabled' : ''}></textarea>
+        <button class="admin-btn admin-btn--primary" onclick="adminSendReply()" ${isClosed ? 'disabled' : ''}>�����</button>
+      </div>
+    </div>
+  `;
+
+  if (_adminConvUnsub) { _adminConvUnsub(); _adminConvUnsub = null; }
+  _adminConvUnsub = ChatService.subscribeToMessages(conversationId, () => loadAdminChatThread(conversationId));
+
+  await loadAdminChatThread(conversationId);
+  ChatService.markConversationRead(conversationId);
+}
+
+async function loadAdminChatThread(conversationId) {
+  const thread = document.getElementById('admin-chat-thread');
+  if (!thread) return;
+  const messages = await ChatService.getMessages(conversationId);
+  const meId = AuthService.currentUser ? AuthService.currentUser.id : null;
+
+  thread.innerHTML = messages.map(m => `
+    <div class="admin-chat-msg admin-chat-msg--${m.sender_id === meId ? 'mine' : 'theirs'}">
+      <div class="admin-chat-msg__bubble">
+        <div class="admin-chat-msg__text">${escapeHtml(m.message)}</div>
+        <div class="admin-chat-msg__meta">
+          ${m.sender_id === meId ? (m.read_at ? '??' : '?') : `�� ${m.sender_role === 'customer' ? '������' : '������'}`}
+          � ${formatChatTime(m.created_at)}
+        </div>
+      </div>
+    </div>
+  `).join('') || '<div class="admin-empty" style="padding:30px">�� ���� ����� ���</div>';
+
+  thread.scrollTop = thread.scrollHeight;
+}
+
+async function adminSendReply() {
+  const input = document.getElementById('admin-chat-input');
+  const text = input ? input.value.trim() : '';
+  if (!text || !_adminActiveConvId) return;
+
+  const ok = await ChatService.sendMessage(_adminActiveConvId, text, ChatService.isStaff() ? 'employee' : 'admin');
+  if (ok) {
+    input.value = '';
+    loadAdminChatThread(_adminActiveConvId);
+    // Auto-resolve when staff replies.
+    await ChatService.updateConversationStatus(_adminActiveConvId, 'resolved');
+    loadAdminConversations();
+  }
+}
+
+async function adminSetConvStatus(conversationId, status) {
+  await ChatService.updateConversationStatus(conversationId, status);
+  showAdminConversationChat(conversationId);
+  loadAdminConversations();
+}
+
+function getConversationStatusMeta(status) {
+  const map = {
+    open: { label: '������' }, pending: { label: '��� ��������' },
+    resolved: { label: '�� ����' }, closed: { label: '�����' }
+  };
+  return map[status] || { label: status };
+}
+
+async function showAdminBookings() {
+  _adminSetActiveNav('admin-nav-bookings');
+  const content = document.getElementById('admin-main-content');
+  if (!content) return;
+
+  content.innerHTML = `
+    <div class="admin-panel">
+      <div class="admin-toolbar">
+        <h2 class="admin-toolbar__title">��������</h2>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>��� �����</th>
+              <th>������</th>
+              <th>������</th>
+              <th>���������</th>
+              <th>������</th>
+              <th>�������</th>
+            </tr>
+          </thead>
+          <tbody id="admin-bookings-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--color-text-tertiary)">���� �������...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  await loadAdminBookings();
+}
+
+async function loadAdminBookings() {
+  const tbody = document.getElementById('admin-bookings-tbody');
+  if (!tbody) return;
+  try {
+    const { data, error } = await SupabaseClient
+      .from('bookings')
+      .select('id, order_number, status, travelers_count, total_price, currency, created_at, customer_name, user_id')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><div class="admin-empty__icon">??</div><div class="admin-empty__title">�� ���� ������</div></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(b => {
+      const st = getBookingStatusMeta(b.status);
+      return `
+        <tr>
+          <td><strong dir="ltr">${b.order_number}</strong></td>
+          <td>${escapeHtml(b.customer_name || '����')}</td>
+          <td><span class="admin-table__status" style="color:${st.color};background:${st.color}15">${st.label}</span></td>
+          <td>${b.travelers_count}</td>
+          <td>${(Number(b.total_price)||0).toLocaleString('ar-SA')} ${b.currency || '�.�'}</td>
+          <td>${formatDateShort(b.created_at)}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="admin-empty"><div class="admin-empty__icon">??</div><div class="admin-empty__title">${escapeHtml(e.message)}</div></div></td></tr>`;
+  }
+}
+
+function formatDateShort(iso) {
+  if (!iso) return '';
+  try { return new Date(iso).toLocaleDateString('ar-SA', { year:'numeric', month:'short', day:'numeric' }); }
+  catch(e){ return ''; }
 }

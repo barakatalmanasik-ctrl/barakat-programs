@@ -139,7 +139,9 @@ function renderDetailPage(programId) {
 }
 
 function handleBooking(programId) {
-  openWhatsAppBooking(programId);
+  // In-app booking flow (real Supabase). WhatsApp remains as an option
+  // on the booking form and inside the booking detail page.
+  window.location.hash = 'booking/' + programId;
 }
 
 function toggleAccordion(header) {

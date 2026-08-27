@@ -21,7 +21,6 @@ async function initApp() {
     await ProgramsService.init();
     await FavoritesService.init();
     await NotificationsService.init();
-    OrdersService.init();
   } catch (e) {
     console.error('Service initialization error:', e);
   }

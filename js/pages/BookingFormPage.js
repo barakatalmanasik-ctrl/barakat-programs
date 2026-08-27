@@ -10,6 +10,8 @@ function renderBookingFormPage(programId) {
   const hasAccommodation = program.hotels && program.hotels.length > 0;
   const roomTypes = hasAccommodation ? [...new Set(program.hotels.map(h => h.roomType))] : [];
 
+  const user = AuthService.currentUser;
+
   container.innerHTML = `
     <div class="booking-form-page">
       <div class="profile-page__header">
@@ -37,15 +39,15 @@ function renderBookingFormPage(programId) {
           <div class="booking-form__card">
             <div class="auth-form__group">
               <label class="auth-form__label">الاسم الكامل *</label>
-              <input type="text" class="auth-form__input" id="bf-name" placeholder="الاسم الكامل" required>
+              <input type="text" class="auth-form__input" id="bf-name" placeholder="الاسم الكامل" value="${user && user.name ? user.name : ''}" required>
             </div>
             <div class="auth-form__group">
               <label class="auth-form__label">رقم الهاتف *</label>
-              <input type="tel" class="auth-form__input" id="bf-phone" placeholder="05XXXXXXXX" required dir="ltr" style="text-align:right">
+              <input type="tel" class="auth-form__input" id="bf-phone" placeholder="05XXXXXXXX" value="${user && user.phone ? user.phone : ''}" required dir="ltr" style="text-align:right">
             </div>
             <div class="auth-form__group">
               <label class="auth-form__label">البريد الإلكتروني</label>
-              <input type="email" class="auth-form__input" id="bf-email" placeholder="example@email.com" dir="ltr" style="text-align:right">
+              <input type="email" class="auth-form__input" id="bf-email" placeholder="example@email.com" value="${user && user.email ? user.email : ''}" dir="ltr" style="text-align:right">
             </div>
             <div class="auth-form__group">
               <label class="auth-form__label">المدينة / الدولة</label>
@@ -131,6 +133,10 @@ function renderBookingFormPage(programId) {
             <span>تأكيد وإرسال طلب الحجز</span>
           </button>
           <p class="booking-form__note">بضغطك على "تأكيد" أنت توافق على <a href="#terms">الشروط والأحكام</a></p>
+          <div class="booking-form__wa-divider">أو</div>
+          <button type="button" class="booking-form__wa-btn" onclick="openWhatsAppBooking('${program.id}')">
+            💬 إرسال الطلب عبر واتساب بدلاً من ذلك
+          </button>
         </div>
       </form>
     </div>
@@ -225,6 +231,15 @@ async function handleBookingSubmit(e, programId) {
   const travelersCount = window._bookingTravelers || 1;
   const travelers = [];
 
+  // Main traveler (index 0) from the customer section.
+  travelers.push({
+    name: customerName,
+    phone: customerPhone || null,
+    nationality: null,
+    dateOfBirth: null,
+    passportNumber: null
+  });
+
   if (travelersCount > 1) {
     for (let i = 2; i <= travelersCount; i++) {
       const name = document.querySelector(`[name="traveler-name-${i}"]`)?.value?.trim();
@@ -244,6 +259,8 @@ async function handleBookingSubmit(e, programId) {
   }
 
   const roomTypeEl = document.getElementById('bf-room-type');
+  const emailEl = document.getElementById('bf-email');
+  const cityEl = document.getElementById('bf-city');
 
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<span class="auth-form__spinner"></span>';
@@ -253,8 +270,8 @@ async function handleBookingSubmit(e, programId) {
     programId: programId,
     customerName: customerName,
     customerPhone: customerPhone,
-    customerEmail: customerEmail || null,
-    customerCity: customerCity || null,
+    customerEmail: emailEl ? emailEl.value.trim() || null : null,
+    customerCity: cityEl ? cityEl.value.trim() || null : null,
     notes: notes,
     travelersCount: travelersCount,
     travelers: travelers,
