@@ -59,6 +59,8 @@ function renderDetailPage(programId) {
           </div>
         </div>
 
+        ${GallerySection()}
+
         ${program.highlights ? `
           <div class="detail-page__section">
             <h3 class="detail-page__section-title">أبرز ما في البرنامج</h3>
