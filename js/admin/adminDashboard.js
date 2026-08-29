@@ -46,13 +46,16 @@ function renderAdminDashboard() {
           <div class="admin-stats" id="admin-stats"></div>
           <div class="admin-toolbar">
             <h2 class="admin-toolbar__title">البرامج</h2>
-            <button class="admin-btn admin-btn--primary" onclick="showAddProgramForm()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              إضافة برنامج
-            </button>
+            <div class="admin-toolbar__controls">
+              <input type="search" class="admin-search" id="admin-programs-search" placeholder="ابحث عن برنامج بالاسم أو الوجهة..." oninput="adminFilterPrograms(this.value)">
+              <button class="admin-btn admin-btn--primary" onclick="showAddProgramForm()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                إضافة برنامج
+              </button>
+            </div>
           </div>
           <div class="admin-table-wrap">
-            <table class="admin-table">
+            <table class="admin-table admin-table--programs">
               <thead>
                 <tr>
                   <th>الاسم</th>
@@ -129,12 +132,13 @@ function renderAdminDashboard() {
             <div class="admin-form__row">
               <div class="admin-form__group">
                 <label class="admin-form__label">تاريخ الانطلاق *</label>
-                <input type="date" class="admin-form__input" id="prg-date_departure" required>
+                <input type="date" class="admin-form__input" id="prg-date_departure" required onchange="adminAutoCalcDuration()">
               </div>
               <div class="admin-form__group">
                 <label class="admin-form__label">تاريخ العودة *</label>
-                <input type="date" class="admin-form__input" id="prg-date_return" required>
+                <input type="date" class="admin-form__input" id="prg-date_return" required onchange="adminAutoCalcDuration()">
               </div>
+              <span class="admin-form__hint" style="grid-column:1 / -1">تُحسب المدة (الأيام والليالي) تلقائياً عند اختيار التواريخ، ويمكنك تعديلها يدوياً</span>
             </div>
 
             <div class="admin-form__row">
@@ -160,8 +164,19 @@ function renderAdminDashboard() {
             </div>
 
             <div class="admin-form__group">
-              <label class="admin-form__label">الصورة التغطية (رابط)</label>
-              <input type="url" class="admin-form__input" id="prg-cover_image" placeholder="https://...">
+              <label class="admin-form__label">صورة الغلاف</label>
+              <div class="admin-cover-picker">
+                <div class="admin-cover-preview" id="prg-cover-preview">
+                  <span class="admin-cover-preview__empty">لا توجد صورة</span>
+                </div>
+                <div class="admin-cover-picker__actions">
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('prg-cover_file').click()">اختيار صورة</button>
+                  <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="document.getElementById('prg-cover_image').value='';adminRefreshCoverPreview()">إزالة الصورة</button>
+                  <input type="file" id="prg-cover_file" accept="image/*" style="display:none" onchange="adminHandleCoverFile(this)">
+                </div>
+                <input type="url" class="admin-form__input" id="prg-cover_image" placeholder="images/covers/مثال.jpeg أو رابط مباشر" oninput="adminRefreshCoverPreview()">
+                <span class="admin-form__hint">الصورة المختارة تُرفع إلى Supabase Storage فور اختيارها، أو ألصق رابطاً مباشراً</span>
+              </div>
             </div>
 
             <div class="admin-form__group">
@@ -175,19 +190,15 @@ function renderAdminDashboard() {
             </div>
 
             <div class="admin-form__group">
-              <label class="admin-form__label">نقاط الומבاز (واحد لكل سطر)</label>
+              <label class="admin-form__label">أبرز نقاط البرنامج (واحد لكل سطر)</label>
               <textarea class="admin-form__textarea" id="prg-highlights" rows="3" placeholder="زيارة برج ميلاد&#10;جولة بحرية&#10;تسوق"></textarea>
               <span class="admin-form__hint">اكتب كل نقطة في سطر منفصل</span>
             </div>
 
             <div class="admin-form__group">
-              <label class="admin-form__label">الخدمات المشمولة (واحد لكل سطر)</label>
-              <textarea class="admin-form__textarea" id="prg-included" rows="3"></textarea>
-            </div>
-
-            <div class="admin-form__group">
-              <label class="admin-form__label">الخدمات غير المشمولة (واحد لكل سطر)</label>
-              <textarea class="admin-form__textarea" id="prg-excluded" rows="3"></textarea>
+              <label class="admin-form__label">مميزات البرنامج</label>
+              <div class="admin-features" id="prg-features-list"></div>
+              <button type="button" class="admin-btn admin-btn--outline admin-btn--small" onclick="adminAddFeatureRow()">+ إضافة ميزة</button>
             </div>
 
             <div class="admin-form__group">
@@ -261,9 +272,25 @@ async function loadAdminStats() {
   }
 }
 
+let adminProgramData = [];
+let adminProgramDestMap = {};
+let adminProgramSearch = '';
+
+const adminTypeLabels = {
+  tourism: 'سياحية', religious: 'دينية', adventure: 'برية',
+  family: 'عائلية', flight: 'جوية', special: 'خاصة'
+};
+
+const adminStatusLabels = {
+  draft: 'مسودة', published: 'منشور', available: 'متاح',
+  limited: 'محدود', full: 'مكتمل', expired: 'منتهي'
+};
+
 async function loadAdminPrograms() {
   const tbody = document.getElementById('admin-programs-tbody');
   if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--color-text-tertiary)">جاري التحميل...</td></tr>';
 
   try {
     const { data: programs, error } = await _adminTimeout(
@@ -274,73 +301,18 @@ async function loadAdminPrograms() {
     );
 
     if (error) throw error;
-
     if (!document.getElementById('admin-programs-tbody')) return;
 
-    if (!programs || programs.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6">
-            <div class="admin-empty">
-              <div class="admin-empty__icon">📋</div>
-              <div class="admin-empty__title">لا توجد برامج</div>
-              <div class="admin-empty__text">ابدأ بإضافة برنامج جديد</div>
-            </div>
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    let destinations = {};
+    adminProgramData = programs || [];
+    adminProgramDestMap = {};
     try {
       const { data: dests } = await SupabaseClient.from('destinations').select('id, name, emoji');
-      if (dests) dests.forEach(d => { destinations[d.id] = d; });
+      if (dests) dests.forEach(d => { adminProgramDestMap[d.id] = d; });
     } catch(e) {}
 
-    const typeLabels = {
-      tourism: 'سياحية', religious: 'دينية', adventure: 'برية',
-      family: 'عائلية', flight: 'جوية', special: 'خاصة'
-    };
-
-    const statusLabels = {
-      draft: 'مسودة', published: 'منشور', available: 'متاح',
-      limited: 'محدود', full: 'مكتمل', expired: 'منتهي'
-    };
-
-    tbody.innerHTML = programs.map(p => {
-      const dest = destinations[p.destination_id];
-      const destName = dest ? `${dest.emoji || ''} ${dest.name}` : p.destination_id || '-';
-      const statusClass = ['published', 'available'].includes(p.status) ? 'published' : p.status;
-
-      return `
-        <tr>
-          <td><strong>${p.name || '-'}</strong></td>
-          <td>${destName}</td>
-          <td>
-            <span class="admin-table__status admin-table__status--${statusClass}">
-              ${statusLabels[p.status] || p.status}
-            </span>
-          </td>
-          <td>${p.date_departure || '-'}</td>
-          <td>${p.price ? p.price.toLocaleString('ar-SA') + ' ' + (p.currency || '') : '-'}</td>
-          <td>
-            <div class="admin-table__actions">
-              <button class="admin-btn--icon" title="تعديل" onclick="showEditProgramForm('${p.id}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-              <button class="admin-btn--icon" title="${p.status === 'published' ? 'إخفاء' : 'نشر'}" onclick="togglePublish('${p.id}', '${p.status}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p.status === 'published' ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>' : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'}</svg>
-              </button>
-              <button class="admin-btn--icon" title="حذف" onclick="deleteProgram('${p.id}')" style="color:var(--color-error)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    renderAdminPrograms();
   } catch (e) {
+    if (!document.getElementById('admin-programs-tbody')) return;
     tbody.innerHTML = `
       <tr>
         <td colspan="6">
@@ -353,6 +325,73 @@ async function loadAdminPrograms() {
       </tr>
     `;
   }
+}
+
+function renderAdminPrograms() {
+  const tbody = document.getElementById('admin-programs-tbody');
+  if (!tbody) return;
+
+  const q = (adminProgramSearch || '').trim().toLowerCase();
+  const list = adminProgramData.filter(p => {
+    if (!q) return true;
+    const dest = adminProgramDestMap[p.destination_id];
+    const destName = dest ? dest.name : '';
+    const hay = [p.name || '', destName, adminTypeLabels[p.type] || '', adminStatusLabels[p.status] || ''].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="admin-empty">
+            <div class="admin-empty__icon">${adminProgramData.length === 0 ? '📋' : '🔍'}</div>
+            <div class="admin-empty__title">${adminProgramData.length === 0 ? 'لا توجد برامج' : 'لا توجد نتائج مطابقة'}</div>
+            <div class="admin-empty__text">${adminProgramData.length === 0 ? 'ابدأ بإضافة برنامج جديد' : 'جرّب كلمة بحث مختلفة'}</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = list.map(p => {
+    const dest = adminProgramDestMap[p.destination_id];
+    const destName = dest ? `${dest.emoji || ''} ${dest.name}` : p.destination_id || '-';
+    const statusClass = ['published', 'available'].includes(p.status) ? 'published' : p.status;
+
+    return `
+      <tr>
+        <td><strong>${p.name || '-'}</strong></td>
+        <td>${destName}</td>
+        <td>
+          <span class="admin-table__status admin-table__status--${statusClass}">
+            ${adminStatusLabels[p.status] || p.status}
+          </span>
+        </td>
+        <td>${p.date_departure || '-'}</td>
+        <td>${p.price ? p.price.toLocaleString('ar-SA') + ' ' + (p.currency || '') : '-'}</td>
+        <td>
+          <div class="admin-table__actions">
+            <button class="admin-btn--icon" title="تعديل" onclick="showEditProgramForm('${p.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="admin-btn--icon" title="${p.status === 'published' ? 'إخفاء' : 'نشر'}" onclick="togglePublish('${p.id}', '${p.status}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${p.status === 'published' ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>' : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'}</svg>
+            </button>
+            <button class="admin-btn--icon" title="حذف" onclick="deleteProgram('${p.id}')" style="color:var(--color-error)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function adminFilterPrograms(value) {
+  adminProgramSearch = value || '';
+  renderAdminPrograms();
 }
 
 async function deleteProgram(id) {
@@ -388,6 +427,9 @@ async function showAddProgramForm() {
   document.getElementById('admin-program-form').reset();
   document.getElementById('prg-currency').value = 'د.ع';
   document.getElementById('prg-status').value = 'draft';
+  const featuresList = document.getElementById('prg-features-list');
+  if (featuresList) { featuresList.innerHTML = ''; adminAddFeatureRow(); }
+  adminRefreshCoverPreview();
   await loadDestinationsSelect();
   openAdminModal();
 }
@@ -416,10 +458,16 @@ async function showEditProgramForm(id) {
     document.getElementById('prg-short_description').value = data.short_description || '';
     document.getElementById('prg-full_description').value = data.full_description || '';
     document.getElementById('prg-highlights').value = Array.isArray(data.highlights) ? data.highlights.join('\n') : (data.highlights || '');
-    document.getElementById('prg-included').value = Array.isArray(data.included_services) ? data.included_services.join('\n') : (data.included_services || '');
-    document.getElementById('prg-excluded').value = Array.isArray(data.excluded_services) ? data.excluded_services.join('\n') : (data.excluded_services || '');
     document.getElementById('prg-booking_terms').value = data.booking_terms || '';
     document.getElementById('prg-cancellation_policy').value = data.cancellation_policy || '';
+
+    const features = Array.isArray(data.included_services) ? data.included_services : [];
+    const featuresList = document.getElementById('prg-features-list');
+    if (featuresList) {
+      featuresList.innerHTML = '';
+      (features.length ? features : ['']).forEach(v => adminAddFeatureRow(v));
+    }
+    adminRefreshCoverPreview();
 
     openAdminModal();
   } catch (e) {
@@ -459,29 +507,38 @@ async function handleAdminProgramSubmit(e) {
   const submitBtn = document.getElementById('admin-modal-submit');
   errorEl.style.display = 'none';
 
+  const name = document.getElementById('prg-name').value.trim();
+  const destination_id = document.getElementById('prg-destination_id').value;
+  const date_departure = document.getElementById('prg-date_departure').value;
+  const date_return = document.getElementById('prg-date_return').value;
+  const price = parseFloat(document.getElementById('prg-price').value);
+
+  if (!name) return adminShowFormError(errorEl, 'يرجى إدخال اسم البرنامج');
+  if (!destination_id) return adminShowFormError(errorEl, 'يرجى اختيار وجهة البرنامج');
+  if (!date_departure || !date_return) return adminShowFormError(errorEl, 'يرجى تحديد تاريخي الانطلاق والعودة');
+  if (date_return < date_departure) return adminShowFormError(errorEl, 'تاريخ العودة يجب أن يكون بعد تاريخ الانطلاق');
+  if (isNaN(price) || price < 0) return adminShowFormError(errorEl, 'يرجى إدخال سعر صحيح');
+
   const id = document.getElementById('prg-id').value;
   const highlightsRaw = document.getElementById('prg-highlights').value.trim();
-  const includedRaw = document.getElementById('prg-included').value.trim();
-  const excludedRaw = document.getElementById('prg-excluded').value.trim();
 
   const programData = {
-    name: document.getElementById('prg-name').value.trim(),
-    destination_id: document.getElementById('prg-destination_id').value || null,
+    name: name,
+    destination_id: destination_id,
     type: document.getElementById('prg-type').value,
     status: document.getElementById('prg-status').value,
     emoji: document.getElementById('prg-emoji').value.trim(),
     cover_image: document.getElementById('prg-cover_image').value.trim() || null,
-    date_departure: document.getElementById('prg-date_departure').value || null,
-    date_return: document.getElementById('prg-date_return').value || null,
+    date_departure: date_departure,
+    date_return: date_return,
     days: parseInt(document.getElementById('prg-days').value) || null,
     nights: parseInt(document.getElementById('prg-nights').value) || null,
-    price: parseFloat(document.getElementById('prg-price').value) || null,
+    price: price,
     currency: document.getElementById('prg-currency').value.trim(),
     short_description: document.getElementById('prg-short_description').value.trim(),
     full_description: document.getElementById('prg-full_description').value.trim(),
     highlights: highlightsRaw ? highlightsRaw.split('\n').filter(l => l.trim()) : [],
-    included_services: includedRaw ? includedRaw.split('\n').filter(l => l.trim()) : [],
-    excluded_services: excludedRaw ? excludedRaw.split('\n').filter(l => l.trim()) : [],
+    included_services: adminGetFeatures(),
     booking_terms: document.getElementById('prg-booking_terms').value.trim(),
     cancellation_policy: document.getElementById('prg-cancellation_policy').value.trim(),
     updated_at: new Date().toISOString()
@@ -496,6 +553,7 @@ async function handleAdminProgramSubmit(e) {
       result = await SupabaseClient.from('programs').update(programData).eq('id', id);
     } else {
       programData.created_at = new Date().toISOString();
+      programData.excluded_services = [];
       result = await SupabaseClient.from('programs').insert(programData);
     }
 
@@ -512,6 +570,111 @@ async function handleAdminProgramSubmit(e) {
     submitBtn.disabled = false;
     submitBtn.textContent = 'حفظ';
   }
+}
+
+function adminShowFormError(errorEl, message) {
+  errorEl.textContent = message;
+  errorEl.style.display = 'block';
+}
+
+function adminGetFeatures() {
+  return Array.from(document.querySelectorAll('#prg-features-list .admin-feature-input')).map(i => i.value.trim()).filter(Boolean);
+}
+
+function adminAddFeatureRow(value) {
+  const list = document.getElementById('prg-features-list');
+  if (!list) return;
+  const row = document.createElement('div');
+  row.className = 'admin-feature-row';
+  row.innerHTML = `
+    <input type="text" class="admin-form__input admin-feature-input" placeholder="مثال: سكن قريب من الحرم" value="${escapeHtml(value || '')}">
+    <button type="button" class="admin-btn--icon admin-feature-remove" title="حذف الميزة" onclick="adminRemoveFeatureRow(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+    </button>
+  `;
+  list.appendChild(row);
+}
+
+function adminRemoveFeatureRow(btn) {
+  const row = btn.closest('.admin-feature-row');
+  const list = document.getElementById('prg-features-list');
+  if (row && list && list.children.length > 1) {
+    row.remove();
+  }
+}
+
+function adminAutoCalcDuration() {
+  const dep = document.getElementById('prg-date_departure')?.value;
+  const ret = document.getElementById('prg-date_return')?.value;
+  const daysEl = document.getElementById('prg-days');
+  const nightsEl = document.getElementById('prg-nights');
+  if (!dep || !ret || !daysEl || !nightsEl) return;
+  const start = new Date(dep + 'T00:00:00');
+  const end = new Date(ret + 'T00:00:00');
+  if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return;
+  const nights = Math.round((end - start) / 86400000);
+  daysEl.value = nights + 1;
+  nightsEl.value = nights;
+}
+
+function adminRefreshCoverPreview() {
+  const input = document.getElementById('prg-cover_image');
+  const preview = document.getElementById('prg-cover-preview');
+  if (!input || !preview) return;
+  const val = (input.value || '').trim();
+  if (val) {
+    preview.innerHTML = `<img src="${escapeHtml(val)}" alt="الغلاف" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="admin-cover-preview__error" style="display:none">تعذر عرض الصورة</span>`;
+  } else {
+    preview.innerHTML = '<span class="admin-cover-preview__empty">لا توجد صورة</span>';
+  }
+}
+
+async function adminHandleCoverFile(fileInput) {
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+
+  const isImage = file.type.startsWith('image/');
+  if (!isImage) {
+    showAdminToast('يرجى اختيار ملف صورة', 'error');
+    fileInput.value = '';
+    return;
+  }
+
+  const preview = document.getElementById('prg-cover-preview');
+  if (preview) {
+    const localUrl = URL.createObjectURL(file);
+    preview.innerHTML = `<img src="${localUrl}" alt="الغلاف">`;
+  }
+
+  try {
+    await adminUploadCoverToStorage(file);
+  } catch (e) {
+    showAdminToast(e.message || 'تعذر رفع الصورة', 'error');
+    adminRefreshCoverPreview();
+  }
+  fileInput.value = '';
+}
+
+async function adminUploadCoverToStorage(file) {
+  const client = SupabaseClient.client;
+  if (!client || !client.storage) throw new Error('خدمة رفع الصور غير متوفرة — ألصق رابطاً مباشراً بدلاً من ذلك');
+
+  const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+  const key = `cover-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { data, error } = await client.storage.from('covers').upload(key, file, { contentType: file.type || 'application/octet-stream', upsert: true });
+  if (error) {
+    const msg = (error.message || '').toString();
+    if (/bucket|not found|does not exist|permission|access denied|new row violates/i.test(msg)) {
+      throw new Error('خزان الصور غير جاهز بعد — نفّذ استعلام 20260829000003 في قاعدة البيانات, أو ألصق رابطاً مباشراً');
+    }
+    throw new Error('تعذر رفع الصورة: ' + msg);
+  }
+
+  const url = `${SUPABASE_CONFIG.url}/storage/v1/object/public/covers/${key}`;
+  document.getElementById('prg-cover_image').value = url;
+  adminRefreshCoverPreview();
+  showAdminToast('تم رفع الصورة بنجاح', 'success');
 }
 
 function toggleAdminSidebar() {
