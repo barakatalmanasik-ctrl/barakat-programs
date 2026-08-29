@@ -1,11 +1,13 @@
 function HotelCard(hotel) {
   const stars = Array(hotel.stars).fill(`<svg class="hotel-card__star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`).join('');
+  const images = (hotel.images && hotel.images.length) ? hotel.images : (hotel.image ? [hotel.image] : []);
+  const mainImage = images[0] || '';
 
   return `
     <div class="hotel-card">
       <div class="hotel-card__top">
-        ${hotel.image
-          ? `<img src="${hotel.image}" alt="${hotel.name}" class="hotel-card__image">`
+        ${mainImage
+          ? `<img src="${mainImage}" alt="${hotel.name}" class="hotel-card__image">`
           : `<div class="hotel-card__image-placeholder">🏨</div>`
         }
         <div class="hotel-card__info">
@@ -16,6 +18,15 @@ function HotelCard(hotel) {
             ${hotel.city}
           </div>
         </div>
+        ${images.length > 1 ? `
+          <div class="hotel-card__gallery">
+            ${images.map((src, i) => `
+              <button type="button" class="hotel-card__thumb${i === 0 ? ' hotel-card__thumb--active' : ''}" data-src="${src}" onclick="setHotelImage(this, '${src}')">
+                <img src="${src}" alt="${hotel.name} ${i + 1}">
+              </button>
+            `).join('')}
+          </div>
+        ` : ''}
       </div>
       <div class="hotel-card__details">
         <div class="hotel-card__detail">
@@ -43,4 +54,14 @@ function HotelCard(hotel) {
       ` : ''}
     </div>
   `;
+}
+
+function setHotelImage(thumb, src) {
+  const card = thumb.closest('.hotel-card');
+  if (!card) return;
+  const main = card.querySelector('.hotel-card__image');
+  if (main) main.src = src;
+  card.querySelectorAll('.hotel-card__thumb').forEach(t => {
+    t.classList.toggle('hotel-card__thumb--active', t.dataset.src === src);
+  });
 }

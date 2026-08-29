@@ -146,9 +146,9 @@ const MockData = {
         }
       ],
       hotels: [
-        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "بوفيه إفطار", "غرف راقية"] },
-        { name: "فندق بارسيان", stars: 3, city: "مشهد", rating: 3.5, image: null, nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "إفطار", "غرف وصالات واسعة"] },
-        { name: "فندق خاور", stars: 3, city: "مشهد", rating: 3.5, image: null, nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "3 وجبات يومياً"] }
+        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, images: ["images/hotels/entekhab-1.jpg", "images/hotels/entekhab-2.jpg", "images/hotels/entekhab-3.jpg"], nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "بوفيه إفطار", "غرف راقية"] },
+        { name: "فندق بارسيان", stars: 3, city: "مشهد", rating: 3.5, image: null, images: ["images/hotels/parsian-1.jpg", "images/hotels/parsian-2.jpg", "images/hotels/parsian-3.jpg"], nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "إفطار", "غرف وصالات واسعة"] },
+        { name: "فندق خاور", stars: 3, city: "مشهد", rating: 3.5, image: null, images: ["images/hotels/khawar-1.jpg", "images/hotels/khawar-2.jpg", "images/hotels/khawar-3.jpg"], nights: 6, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "3 وجبات يومياً"] }
       ]
     },
     {
@@ -394,7 +394,7 @@ const MockData = {
       ],
       hotels: [
         { name: "فندق قم", stars: 3, city: "قم", rating: 3.5, image: null, nights: 2, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم"] },
-        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, nights: 4, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم", "بوفيه"] }
+        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, images: ["images/hotels/entekhab-1.jpg", "images/hotels/entekhab-2.jpg", "images/hotels/entekhab-3.jpg"], nights: 4, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم", "بوفيه"] }
       ]
     },
     {
@@ -498,7 +498,7 @@ const MockData = {
       hotels: [
         { name: "فندق ارام", stars: 3, city: "رشت", rating: 3.5, image: null, nights: 1, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم"] },
         { name: "فندق فومن", stars: 3, city: "فومن", rating: 3.5, image: null, nights: 2, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم"] },
-        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, nights: 4, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم", "بوفيه"] }
+        { name: "فندق انتخاب", stars: 4, city: "مشهد", rating: 4.0, image: null, images: ["images/hotels/entekhab-1.jpg", "images/hotels/entekhab-2.jpg", "images/hotels/entekhab-3.jpg"], nights: 4, roomType: "غرفة قياسية", amenities: ["واي فاي مجاني", "مطعم", "بوفيه"] }
       ]
     },
     {

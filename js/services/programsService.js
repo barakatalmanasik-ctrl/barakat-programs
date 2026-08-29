@@ -28,6 +28,14 @@ const ProgramsService = {
     '22222222-2222-2222-2222-222222222222': { name: 'السعودية', emoji: '🇸🇦', gradient: 'linear-gradient(135deg, #0F4C5C 0%, #1B7A8C 100%)' }
   },
 
+  // Static gallery fallback for the fixed hotel names (3 photos each). Used
+  // when the live `hotels` table doesn't expose the images column yet.
+  _hotelImageMap: {
+    'فندق انتخاب': ['images/hotels/entekhab-1.jpg', 'images/hotels/entekhab-2.jpg', 'images/hotels/entekhab-3.jpg'],
+    'فندق بارسيان': ['images/hotels/parsian-1.jpg', 'images/hotels/parsian-2.jpg', 'images/hotels/parsian-3.jpg'],
+    'فندق خاور': ['images/hotels/khawar-1.jpg', 'images/hotels/khawar-2.jpg', 'images/hotels/khawar-3.jpg']
+  },
+
   isConfigured() {
     return typeof SupabaseClient !== 'undefined' && SupabaseClient.isConfigured;
   },
@@ -227,6 +235,7 @@ const ProgramsService = {
           stars: h.stars || 3,
           rating: h.rating,
           image: h.image_url,
+          images: (h.images && h.images.length) ? h.images : (this._hotelImageMap[h.name] || []),
           roomType: ph.room_type || 'غرفة قياسية',
           nights: ph.nights || 0,
           amenities: ph.amenities || h.amenities || [],
