@@ -54,7 +54,7 @@ async function renderBookingDetailPage(bookingId) {
   container.innerHTML = `
     <div class="bd-page">
       <div class="bd-page__header">
-        <button class="bd-page__back" onclick="history.back()">
+        <button class="bd-page__back" onclick="Router.back()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
         <h1 class="bd-page__title">تفاصيل الحجز</h1>
@@ -187,7 +187,7 @@ async function openBookingChat(bookingId) {
 
   const conv = await ChatService.getOrCreateConversation(bookingId, subject);
   if (!conv) { alert('تعذر فتح المحادثة، يرجى المحاولة مرة أخرى'); return; }
-  window.location.hash = 'chat/' + conv.id;
+  Router.go('chat/' + conv.id);
 }
 
 function openWhatsAppBookingSupport(bookingId) {

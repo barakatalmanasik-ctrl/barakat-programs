@@ -3,7 +3,7 @@ function renderRegisterPage() {
   container.innerHTML = `
     <div class="auth-page">
       <div class="auth-page__header">
-        <button class="auth-page__back" onclick="history.back()">
+        <button class="auth-page__back" onclick="Router.back()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
       </div>
@@ -155,7 +155,7 @@ async function handleRegisterForm(e) {
         `;
       }
     } else {
-      window.location.hash = 'more';
+      Router.go('more');
     }
   } else {
     errorEl.textContent = result.error;

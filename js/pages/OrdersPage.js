@@ -9,7 +9,7 @@ async function renderOrdersPage() {
   container.innerHTML = `
     <div class="orders-page">
       <div class="orders-page__header">
-        <button class="orders-page__back" onclick="navigateToPage('more')">
+        <button class="orders-page__back" onclick="Router.back()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
         <h1 class="orders-page__title">حجوزاتي</h1>
@@ -73,7 +73,7 @@ async function renderOrdersPage() {
 }
 
 function navigateToOrderDetail(bookingId) {
-  window.location.hash = 'booking-detail/' + bookingId;
+  Router.go('booking-detail/' + bookingId);
 }
 
 function formatDate(iso) {

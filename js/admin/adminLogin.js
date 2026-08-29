@@ -79,11 +79,30 @@ async function handleAdminLogin(e) {
       return;
     }
 
-    window.location.hash = 'admin/dashboard';
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>جاري التحميل...</span>';
+    await waitForAdminUser();
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>تسجيل الدخول</span>';
+    Router.go('admin/dashboard');
   } catch (err) {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<span>تسجيل الدخول</span>';
     errorEl.textContent = err.message || 'حدث خطأ أثناء تسجيل الدخول';
     errorEl.style.display = 'block';
   }
+}
+
+// After a successful sign-in, AuthService._user is set asynchronously by the
+// auth-state listener. Wait for it so the router's admin guard doesn't bounce
+// the admin back to the login page right after authenticating.
+function waitForAdminUser(timeout) {
+  return new Promise(function(resolve) {
+    if (AuthService.isLoggedIn) { resolve(true); return; }
+    const start = Date.now();
+    const timer = setInterval(function() {
+      if (AuthService.isLoggedIn) { clearInterval(timer); resolve(true); }
+      else if (Date.now() - start > (timeout || 5000)) { clearInterval(timer); resolve(false); }
+    }, 100);
+  });
 }

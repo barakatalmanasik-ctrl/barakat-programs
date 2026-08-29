@@ -195,6 +195,6 @@ async function changePassword() {
 function handleLogout() {
   if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
     AuthService.logout();
-    window.location.hash = 'home';
+    Router.go('home');
   }
 }

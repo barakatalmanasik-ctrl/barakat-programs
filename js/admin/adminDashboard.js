@@ -10,15 +10,15 @@ function renderAdminDashboard() {
           <div class="admin-sidebar__brand-sub">لوحة التحكم</div>
         </div>
         <nav class="admin-sidebar__nav">
-          <a class="admin-sidebar__link admin-sidebar__link--active" href="#admin/dashboard" id="admin-nav-dashboard">
+          <a class="admin-sidebar__link admin-sidebar__link--active" href="#admin/dashboard" id="admin-nav-dashboard" onclick="closeAdminSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             لوحة التحكم
           </a>
-          <a class="admin-sidebar__link" href="#admin/conversations" id="admin-nav-conversations">
+          <a class="admin-sidebar__link" href="#admin/conversations" id="admin-nav-conversations" onclick="closeAdminSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             المحادثات
           </a>
-          <a class="admin-sidebar__link" href="#admin/bookings" id="admin-nav-bookings">
+          <a class="admin-sidebar__link" href="#admin/bookings" id="admin-nav-bookings" onclick="closeAdminSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
             الحجوزات
           </a>
@@ -682,11 +682,16 @@ function toggleAdminSidebar() {
   if (sidebar) sidebar.classList.toggle('admin-sidebar--open');
 }
 
+function closeAdminSidebar() {
+  const sidebar = document.getElementById('admin-sidebar');
+  if (sidebar) sidebar.classList.remove('admin-sidebar--open');
+}
+
 async function adminLogout() {
   try {
     await SupabaseClient.auth.signOut();
   } catch(e) {}
-  window.location.hash = 'admin/login';
+  Router.replace('admin/login');
 }
 
 function showAdminToast(message, type) {
@@ -731,6 +736,18 @@ function _adminSetActiveNav(id) {
   document.querySelectorAll('.admin-sidebar__link').forEach(l => l.classList.remove('admin-sidebar__link--active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('admin-sidebar__link--active');
+  closeAdminSidebar();
+}
+
+// Called by the router when leaving any admin section: invalidate pending
+// renders and stop realtime subscriptions (prevents stale listeners/refresh
+// loops that can freeze the tab).
+function adminCleanupSubscriptions() {
+  _adminViewToken++; // invalidate in-flight renders
+  if (_adminConvUnsub) {
+    try { _adminConvUnsub(); } catch (e) {}
+    _adminConvUnsub = null;
+  }
 }
 
 async function showAdminConversations(filter) {
@@ -792,7 +809,7 @@ async function loadAdminConversations() {
     const lastMsg = c.lastMessage ? c.lastMessage.message : 'لا توجد رسائل بعد';
     const lastTime = c.lastMessage ? c.lastMessage.created_at : c.updated_at;
     return `
-      <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="window.location.hash='admin/chat/${c.id}'">
+      <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="Router.go('admin/chat/${c.id}')">
         <div class="admin-conv-avatar">${(cName).charAt(0)}</div>
         <div class="admin-conv-body">
           <div class="admin-conv-top">
@@ -824,7 +841,7 @@ async function showAdminConversationChat(conversationId) {
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-<button class="admin-btn admin-btn--outline admin-btn--small" onclick="window.location.hash='admin/conversations'">↩ المحادثات</button>
+<button class="admin-btn admin-btn--outline admin-btn--small" onclick="Router.go('admin/conversations')">↩ المحادثات</button>
         <h2 class="admin-toolbar__title">المحادثة</h2>
       </div>
 
@@ -992,7 +1009,7 @@ async function loadAdminBookings() {
       const st = getBookingStatusMeta(b.status);
       const prog = progMap[b.program_id];
       return `
-        <tr class="admin-booking-row" onclick="window.location.hash='admin/booking/${b.id}'">
+        <tr class="admin-booking-row" onclick="Router.go('admin/booking/${b.id}')">
           <td><strong dir="ltr">${b.order_number}</strong></td>
           <td>${escapeHtml(b.customer_name || 'زائر')}</td>
           <td>${prog ? `${prog.emoji || ''} ${escapeHtml(prog.name)}` : '-'}</td>
@@ -1017,7 +1034,7 @@ async function showAdminBookingDetail(bookingId) {
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="window.location.hash='admin/bookings'">↩ الحجوزات</button>
+        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="Router.go('admin/bookings')">↩ الحجوزات</button>
         <h2 class="admin-toolbar__title">تفاصيل الحجز</h2>
       </div>
       <div id="admin-booking-detail">

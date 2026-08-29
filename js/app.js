@@ -32,7 +32,8 @@ async function initApp() {
   renderMorePage();
 
   if (isAdminDomain() && !window.location.hash) {
-    window.location.hash = 'admin/login';
+    try { history.replaceState(null, '', '#admin/login'); }
+    catch (e) { window.location.hash = 'admin/login'; }
   }
 
   Router.init();

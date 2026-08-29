@@ -3899,3 +3899,102 @@
   justify-content: center;
 }
 .chat-page__send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Share bottom sheet (من زر المشاركة في صفحة البرنامج) ────────────── */
+.share-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 10);
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+.share-sheet-overlay--show { opacity: 1; }
+
+.share-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-modal) + 11);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 0 var(--space-xl) max(var(--space-xl), env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform var(--transition-slow);
+  box-shadow: var(--shadow-xl);
+}
+.share-sheet--show { transform: translateY(0); }
+
+.share-sheet__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin: var(--space-md) auto;
+}
+
+.share-sheet__header { text-align: center; margin-bottom: var(--space-lg); }
+.share-sheet__title { font-size: var(--font-size-lg); font-weight: 700; margin: 0 0 4px; }
+.share-sheet__subtitle {
+  display: inline-block;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.share-sheet__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.share-sheet__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm) 0;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.share-sheet__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.share-sheet__icon svg { width: 24px; height: 24px; }
+.share-sheet__icon--native { background: var(--color-primary); color: #fff; }
+.share-sheet__icon--whatsapp { background: #25D366; color: #fff; }
+.share-sheet__icon--telegram { background: #229ED9; color: #fff; }
+.share-sheet__icon--facebook { background: #1877F2; color: #fff; }
+
+.share-sheet__copy {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+background: var(--color-surface);
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+.share-sheet__copy svg { width: 18px; height: 18px; }

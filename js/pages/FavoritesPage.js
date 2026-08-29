@@ -9,7 +9,7 @@ function renderFavoritesPage() {
   container.innerHTML = `
     <div class="favorites-page">
       <div class="favorites-page__header">
-        <button class="favorites-page__back" onclick="navigateToPage('more')">
+        <button class="favorites-page__back" onclick="Router.back()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
         <h1 class="favorites-page__title">المفضلة</h1>

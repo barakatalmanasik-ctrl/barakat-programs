@@ -13,7 +13,7 @@ async function renderChatPage(conversationId) {
     container.innerHTML = `
       <div class="chat-page">
         <div class="chat-page__header">
-          <button class="chat-page__back" onclick="history.back()">
+          <button class="chat-page__back" onclick="Router.back()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
           </button>
           <h1 class="chat-page__title">المحادثة</h1>
@@ -31,7 +31,7 @@ async function renderChatPage(conversationId) {
   container.innerHTML = `
     <div class="chat-page">
       <div class="chat-page__header">
-        <button class="chat-page__back" onclick="history.back()">
+        <button class="chat-page__back" onclick="Router.back()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
         <div class="chat-page__title-wrap">
@@ -64,6 +64,10 @@ async function renderChatPage(conversationId) {
 
   bindChatInput(conv, isClosed);
   await loadChatMessages(conversationId);
+  if (_chatUnsub) {
+    try { _chatUnsub(); } catch (e) {}
+    _chatUnsub = null;
+  }
   _chatUnsub = ChatService.subscribeToMessages(conversationId, onChatMessage);
   ChatService.markConversationRead(conversationId);
 }
@@ -123,14 +127,23 @@ async function sendChatMessage() {
 async function openNewConversation(bookingId, subject) {
   const conv = await ChatService.createNewConversation(bookingId, subject);
   if (conv) {
-    window.location.hash = 'chat/' + conv.id;
+    Router.go('chat/' + conv.id);
   } else {
     navigateToBookingHome();
   }
 }
 
 function navigateToBookingHome() {
-  window.location.hash = 'orders';
+  Router.go('orders');
+}
+
+// Called by the router when leaving the chat page to stop realtime
+// subscriptions (prevents duplicate listeners on re-entry and freezes).
+function cleanupChatPage() {
+  if (_chatUnsub) {
+    try { _chatUnsub(); } catch (e) {}
+    _chatUnsub = null;
+  }
 }
 
 function getConversationStatusLabel(status) {
