@@ -19,6 +19,15 @@ const ProgramsService = {
     ended: 'منتهي'
   },
 
+  // Canonical display destinations for the fixed seed IDs. Kept in the
+  // frontend because the `destinations` table is not readable by the anon
+  // role (RLS) in the live DB, so a Supabase join would resolve to nothing
+  // and every program used to fall back to "إيران".
+  _destFallbackMap: {
+    '11111111-1111-1111-1111-111111111111': { name: 'إيران', emoji: '🇮🇷', gradient: 'linear-gradient(135deg, #1B3A5C 0%, #2C5F8A 100%)' },
+    '22222222-2222-2222-2222-222222222222': { name: 'السعودية', emoji: '🇸🇦', gradient: 'linear-gradient(135deg, #0F4C5C 0%, #1B7A8C 100%)' }
+  },
+
   isConfigured() {
     return typeof SupabaseClient !== 'undefined' && SupabaseClient.isConfigured;
   },
@@ -130,9 +139,10 @@ const ProgramsService = {
     (MockData.programs || []).forEach(m => { mockByName[m.name] = m; });
 
     this._programs = programs.map(p => {
-      const dest = destMap[p.destination_id] || {};
+      const dest = this._destFallbackMap[p.destination_id] || destMap[p.destination_id] || {};
       const norm = {
         id: p.id,
+        destinationId: p.destination_id,
         name: p.name,
         destination: dest.name || 'إيران',
         destinationEmoji: dest.emoji || '🇮🇷',
@@ -225,20 +235,34 @@ const ProgramsService = {
   },
 
   async _loadDestinations() {
+    // Build the destination list from the programs that actually exist, so the
+    // names/emojis always match what the cards show (never stale mock labels).
+    const byId = {};
+    const counts = {};
+    (this._programs || []).forEach(p => {
+      if (!p.destinationId) return;
+      byId[p.destinationId] = {
+        id: p.destinationId,
+        name: p.destination,
+        emoji: p.destinationEmoji || '✈️',
+        gradient: p.gradient || undefined
+      };
+      counts[p.destinationId] = (counts[p.destinationId] || 0) + 1;
+    });
+    const list = Object.keys(byId).map(id => ({
+      ...byId[id],
+      programCount: counts[id] || 0
+    }));
+    if (list.length) return list;
     try {
       const { data } = await SupabaseClient.from('destinations').select('id, name, emoji, gradient');
       if (data && data.length) {
-        const counts = {};
-        (this._programs || []).forEach(p => {
-          const key = p.destination;
-          counts[key] = (counts[key] || 0) + 1;
-        });
         return data.map(d => ({
           id: d.id,
           name: d.name,
           emoji: d.emoji,
           gradient: d.gradient,
-          programCount: counts[d.name] || (MockData.destinations.find(m => m.name === d.name) || {}).programCount || 0
+          programCount: counts[d.name] || 0
         }));
       }
     } catch (e) {}

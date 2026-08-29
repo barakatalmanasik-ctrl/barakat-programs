@@ -32,9 +32,9 @@ const MockData = {
 
   priceRanges: [
     { id: "all", label: "الكل", min: 0, max: Infinity },
-    { id: "budget", label: "أقل من 400 ألف د.ع", min: 0, max: 400000 },
-    { id: "mid", label: "400 - 700 ألف د.ع", min: 400000, max: 700000 },
-    { id: "high", label: "700 ألف - مليون د.ع", min: 700000, max: 1000000 },
+    { id: "budget", label: "أقل من 400 ألف د.ع", min: 0, max: 399999 },
+    { id: "mid", label: "400 - 700 ألف د.ع", min: 400000, max: 699999 },
+    { id: "high", label: "700 ألف - مليون د.ع", min: 700000, max: 999999 },
     { id: "premium", label: "أكثر من مليون د.ع", min: 1000000, max: Infinity }
   ],
 
@@ -43,7 +43,7 @@ const MockData = {
     { id: "short", label: "1-3 أيام", min: 1, max: 3 },
     { id: "medium", label: "4-6 أيام", min: 4, max: 6 },
     { id: "long", label: "7-10 أيام", min: 7, max: 10 },
-    { id: "extended", label: "أكثر من 10", min: 10, max: Infinity }
+    { id: "extended", label: "أكثر من 10", min: 11, max: Infinity }
   ],
 
   programs: [

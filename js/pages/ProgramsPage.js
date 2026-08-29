@@ -7,6 +7,77 @@ let filterState = {
   search: ''
 };
 
+const PROGRAMS_TYPE_LABELS = {
+  all: 'الكل',
+  tourism: 'برامج سياحية',
+  religious: 'برامج دينية',
+  adventure: 'رحلات برية',
+  flight: 'رحلات جوية',
+  family: 'برامج عائلية',
+  special: 'برامج خاصة'
+};
+
+const PROGRAMS_STATUS_LABELS = {
+  available: 'متاح للحجز',
+  published: 'متاح للحجز',
+  limited: 'المقاعد محدودة',
+  full: 'مكتمل',
+  soon: 'قريباً',
+  draft: 'مسودة',
+  expired: 'منتهي'
+};
+
+function _normalizeArabic(str) {
+  return String(str || '')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+    .replace(/[أإآا]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/[،,]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function _programSearchText(p) {
+  return [
+    p.name,
+    p.destination,
+    p.destinationEmoji,
+    PROGRAMS_TYPE_LABELS[p.type],
+    p.statusText,
+    p.shortDescription,
+    p.fullDescription,
+    p.dateDisplay,
+    (p.highlights || []).join(' '),
+    (p.itinerary || []).map(d => (d.title || '') + ' ' + (d.city || '')).join(' ')
+  ].filter(Boolean).join(' ');
+}
+
+function _matchesSearch(p, query) {
+  if (!query) return true;
+  const text = _normalizeArabic(_programSearchText(p));
+  return String(query).split(/\s+/).filter(Boolean).every(token => text.includes(_normalizeArabic(token)));
+}
+
+function getVisibleTypeOptions() {
+  const seen = {};
+  ProgramsService.getVisible().forEach(p => { if (p.type) seen[p.type] = true; });
+  return [{ id: 'all', label: 'الكل' }].concat(
+    Object.keys(seen).map(t => ({ id: t, label: PROGRAMS_TYPE_LABELS[t] || t }))
+  );
+}
+
+function getVisibleStatusOptions() {
+  const seen = {};
+  ProgramsService.getVisible().forEach(p => { if (p.status) seen[p.status] = true; });
+  return [{ id: 'all', label: 'الكل' }].concat(
+    Object.keys(seen).map(s => ({ id: s, label: PROGRAMS_STATUS_LABELS[s] || s }))
+  );
+}
+
 function renderProgramsPage() {
   const container = document.getElementById('programs-content');
   const activeFilterCount = getActiveFilterCount();
@@ -22,10 +93,10 @@ function renderProgramsPage() {
         </button>
       </div>
       <div class="programs-page__search">
-        ${SearchBar('ابحث بالاسم أو الوجهة...', 'programs-search')}
+        ${SearchBar('ابحث بالاسم أو الوجهة...', 'programs-search', filterState.search)}
       </div>
       <div class="programs-page__quick-filters" id="programs-quick-filters">
-        ${FilterPanel(MockData.tripTypes, filterState.type, 'setTypeFilter')}
+        ${FilterPanel(getVisibleTypeOptions(), filterState.type, 'setTypeFilter')}
       </div>
       <div class="programs-page__results" id="programs-results">
         <div class="programs-page__results-count">${getFilteredPrograms().length} برنامج</div>
@@ -42,13 +113,7 @@ function getFilteredPrograms() {
   let filtered = ProgramsService.getVisible();
 
   if (filterState.search) {
-    const q = filterState.search.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.destination.includes(q) ||
-      p.shortDescription.includes(q) ||
-      p.fullDescription.includes(q)
-    );
+    filtered = filtered.filter(p => _matchesSearch(p, filterState.search));
   }
 
   if (filterState.type !== 'all') {
@@ -62,14 +127,20 @@ function getFilteredPrograms() {
   if (filterState.duration !== 'all') {
     const range = MockData.durationRanges.find(d => d.id === filterState.duration);
     if (range) {
-      filtered = filtered.filter(p => p.days >= range.min && p.days <= range.max);
+      filtered = filtered.filter(p => {
+        const days = Number(p.days) || 0;
+        return days >= range.min && (range.max === Infinity || days <= range.max);
+      });
     }
   }
 
   if (filterState.price !== 'all') {
-    const range = MockData.priceRanges.find(p => p.id === filterState.price);
+    const range = MockData.priceRanges.find(pr => pr.id === filterState.price);
     if (range) {
-      filtered = filtered.filter(p => p.price >= range.min && p.price < range.max);
+      filtered = filtered.filter(p => {
+        const price = Number(p.price) || 0;
+        return price >= range.min && (range.max === Infinity || price <= range.max);
+      });
     }
   }
 
@@ -83,7 +154,12 @@ function getFilteredPrograms() {
 function renderFilteredPrograms() {
   const filtered = getFilteredPrograms();
   if (filtered.length === 0) {
-    return EmptyState('🔍', 'لا توجد برامج', 'لم نتمكن من العثور على برامج تطابق معايير البحث. جرّب تغيير الفلاتر.');
+    return EmptyState(
+      '🔍',
+      'لا توجد برامج مطابقة لبحثك',
+      'جرّب كلمات أخرى أو أزل الفلاتر لعرض جميع البرامج.',
+      '<button class="empty-state__reset-btn" onclick="resetAllFilters()">إزالة الفلاتر</button>'
+    );
   }
   return filtered.map(p => ProgramCard(p)).join('');
 }
@@ -94,6 +170,30 @@ function updateProgramsGrid() {
   const results = document.getElementById('programs-results');
   if (grid) grid.innerHTML = renderFilteredPrograms();
   if (results) results.innerHTML = `<div class="programs-page__results-count">${filtered.length} برنامج</div>`;
+  refreshHomeUpcoming();
+}
+
+function getHomeUpcomingPrograms() {
+  const visible = ProgramsService.getVisible().filter(p => p.status === 'available' || p.status === 'limited' || p.status === 'published');
+  if (filterState.search) return visible.filter(p => _matchesSearch(p, filterState.search));
+  return visible;
+}
+
+function refreshHomeUpcoming() {
+  const grid = document.getElementById('home-upcoming-grid');
+  if (grid) {
+    const items = getHomeUpcomingPrograms();
+    grid.innerHTML = items.length
+      ? items.map(p => ProgramCard(p)).join('')
+      : EmptyState(
+          '🔍',
+          'لا توجد برامج مطابقة لبحثك',
+          '',
+          '<button class="empty-state__reset-btn" onclick="resetAllFilters()">إزالة الفلاتر</button>'
+        );
+  }
+  const count = document.getElementById('home-upcoming-count');
+  if (count) count.textContent = getHomeUpcomingPrograms().length;
 }
 
 function getActiveFilterCount() {
@@ -121,6 +221,8 @@ function resetAllFilters() {
   filterState = { destination: 'all', type: 'all', duration: 'all', price: 'all', status: 'all', search: '' };
   const searchInput = document.querySelector('#programs-search .search-bar__input');
   if (searchInput) searchInput.value = '';
+  const homeSearchInput = document.querySelector('#home-search .search-bar__input');
+  if (homeSearchInput) homeSearchInput.value = '';
   refreshFilterSheet();
   updateFilterCountDisplay();
   updateProgramsGrid();
@@ -178,4 +280,5 @@ function filterByDestination(destination) {
   const searchInput = document.querySelector('#programs-search .search-bar__input');
   if (searchInput) searchInput.value = destination;
   updateProgramsGrid();
+  return false;
 }

@@ -15,11 +15,14 @@
 --     جوا (قم-مشهد) ................ 750,000 د.ع
 --     شمال ايران + مشهد ............ 900,000 د.ع
 --
--- SAFE: 100% INSERT-only with ON CONFLICT (id) DO NOTHING.
+-- SAFE: 100% INSERT-only.
+--   - destinations/programs/hotels: ON CONFLICT (id) DO NOTHING.
+--   - program_hotels: guarded with WHERE NOT EXISTS (the table has
+--     no UNIQUE constraint on (program_id, hotel_id), so ON CONFLICT
+--     on that pair fails with 42P10).
 --   - Does NOT delete or overwrite ANY existing row.
 --   - Does NOT touch the 4 Umrah programs (bbbbbbbb-...).
---   - Hotels + program_hotels links are re-inserted only if the
---     fixed IDs are absent.
+--   - Idempotent: safe to re-run if a previous run partially applied.
 -- Paste into: Supabase Dashboard -> SQL Editor -> New query -> Run.
 -- ============================================================
 
@@ -152,7 +155,9 @@ INSERT INTO hotels (id, name, city, stars, rating, amenities) VALUES
   ('aaaaaaaa-2222-0000-0000-000000000006', 'فندق فومن',    'فومن', 3, 3.5, ARRAY['واي فاي مجاني', 'مطعم'])
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO program_hotels (program_id, hotel_id, room_type, nights, sort_order) VALUES
+INSERT INTO program_hotels (program_id, hotel_id, room_type, nights, sort_order)
+SELECT v.program_id::uuid, v.hotel_id::uuid, v.room_type, v.nights, v.sort_order
+FROM (VALUES
   ('aaaaaaaa-1111-0000-0000-000000000001', 'aaaaaaaa-2222-0000-0000-000000000001', 'غرفة قياسية', 6, 1),
   ('aaaaaaaa-1111-0000-0000-000000000001', 'aaaaaaaa-2222-0000-0000-000000000002', 'غرفة قياسية', 6, 2),
   ('aaaaaaaa-1111-0000-0000-000000000001', 'aaaaaaaa-2222-0000-0000-000000000003', 'غرفة قياسية', 6, 3),
@@ -163,7 +168,11 @@ INSERT INTO program_hotels (program_id, hotel_id, room_type, nights, sort_order)
   ('aaaaaaaa-1111-0000-0000-000000000004', 'aaaaaaaa-2222-0000-0000-000000000005', 'غرفة قياسية', 1, 1),
   ('aaaaaaaa-1111-0000-0000-000000000004', 'aaaaaaaa-2222-0000-0000-000000000006', 'غرفة قياسية', 2, 2),
   ('aaaaaaaa-1111-0000-0000-000000000004', 'aaaaaaaa-2222-0000-0000-000000000001', 'غرفة قياسية', 4, 3)
-ON CONFLICT (program_id, hotel_id) DO NOTHING;
+) AS v(program_id, hotel_id, room_type, nights, sort_order)
+WHERE NOT EXISTS (
+  SELECT 1 FROM program_hotels ph
+  WHERE ph.program_id = v.program_id::uuid AND ph.hotel_id = v.hotel_id::uuid
+);
 
 -- ============================================================
 -- DONE. Refresh the site: 8 programs total (4 Iran + 4 Umrah),

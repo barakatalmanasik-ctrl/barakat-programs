@@ -1,6 +1,6 @@
 function renderHomePage() {
   const container = document.getElementById('home-content');
-  const upcomingPrograms = ProgramsService.getVisible().filter(p => p.status === 'available' || p.status === 'limited' || p.status === 'published');
+  const upcomingPrograms = getHomeUpcomingPrograms();
 
   container.innerHTML = `
     <div class="welcome-section">
@@ -9,19 +9,26 @@ function renderHomePage() {
     </div>
 
     <div class="section" style="padding-top: 0">
-      ${SearchBar('ابحث عن برنامج أو وجهة...')}
+      ${SearchBar('ابحث عن برنامج أو وجهة...', 'home-search')}
     </div>
 
     <div class="section" style="padding-top: 0">
       <div class="section__header">
-        <h2 class="section__title">البرامج القادمة</h2>
+        <h2 class="section__title">البرامج القادمة <span id="home-upcoming-count" class="home-upcoming-count">${upcomingPrograms.length}</span></h2>
         <a class="section__link" href="#programs">
           عرض الكل
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </a>
       </div>
-      <div class="programs-page__grid">
-        ${upcomingPrograms.map(p => ProgramCard(p)).join('')}
+      <div class="programs-page__grid" id="home-upcoming-grid">
+        ${upcomingPrograms.length
+          ? upcomingPrograms.map(p => ProgramCard(p)).join('')
+          : EmptyState(
+              '🔍',
+              'لا توجد برامج مطابقة لبحثك',
+              '',
+              '<button class="empty-state__reset-btn" onclick="resetAllFilters()">إزالة الفلاتر</button>'
+            )}
       </div>
     </div>
 

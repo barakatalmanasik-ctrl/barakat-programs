@@ -25,7 +25,7 @@ function FilterBottomSheet() {
           <div class="filter-sheet__group">
             <div class="filter-sheet__group-title">نوع الرحلة</div>
             <div class="filter-sheet__chips" id="filter-types">
-              ${MockData.tripTypes.map(t => `
+              ${getVisibleTypeOptions().map(t => `
                 <button class="filter-sheet__chip ${filterState.type === t.id ? 'active' : ''}" onclick="setFilter('type', '${t.id}')">
                   ${t.label}
                 </button>
@@ -58,10 +58,11 @@ function FilterBottomSheet() {
           <div class="filter-sheet__group">
             <div class="filter-sheet__group-title">حالة البرنامج</div>
             <div class="filter-sheet__chips" id="filter-status">
-              <button class="filter-sheet__chip ${filterState.status === 'all' ? 'active' : ''}" onclick="setFilter('status', 'all')">الكل</button>
-              <button class="filter-sheet__chip ${filterState.status === 'available' ? 'active' : ''}" onclick="setFilter('status', 'available')">متاح للحجز</button>
-              <button class="filter-sheet__chip ${filterState.status === 'limited' ? 'active' : ''}" onclick="setFilter('status', 'limited')">المقاعد محدودة</button>
-              <button class="filter-sheet__chip ${filterState.status === 'soon' ? 'active' : ''}" onclick="setFilter('status', 'soon')">قريباً</button>
+              ${getVisibleStatusOptions().map(s => `
+                <button class="filter-sheet__chip ${filterState.status === s.id ? 'active' : ''}" onclick="setFilter('status', '${s.id}')">
+                  ${s.label}
+                </button>
+              `).join('')}
             </div>
           </div>
 

@@ -824,6 +824,37 @@
   line-height: var(--line-height-relaxed);
 }
 
+.empty-state__actions {
+  margin-top: var(--space-lg);
+}
+
+.empty-state__reset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.home-upcoming-count {
+  display: inline-block;
+  min-width: 24px;
+  padding: 0 8px;
+  margin-inline-start: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  line-height: 24px;
+  vertical-align: 2px;
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;
