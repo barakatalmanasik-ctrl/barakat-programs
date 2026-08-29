@@ -14,11 +14,11 @@ function renderAdminDashboard() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             لوحة التحكم
           </a>
-          <a class="admin-sidebar__link" href="#" id="admin-nav-conversations" onclick="showAdminConversations(); return false;">
+          <a class="admin-sidebar__link" href="#admin/conversations" id="admin-nav-conversations">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             المحادثات
           </a>
-          <a class="admin-sidebar__link" href="#" id="admin-nav-bookings" onclick="showAdminBookings(); return false;">
+          <a class="admin-sidebar__link" href="#admin/bookings" id="admin-nav-bookings">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
             الحجوزات
           </a>
@@ -222,7 +222,7 @@ async function loadAdminStats() {
   if (!statsEl) return;
 
   try {
-    const { data, error } = await SupabaseClient.from('programs').select('id, status');
+    const { data, error } = await _adminTimeout(SupabaseClient.from('programs').select('id, status'));
     if (error) throw error;
 
     const total = data.length;
@@ -266,12 +266,16 @@ async function loadAdminPrograms() {
   if (!tbody) return;
 
   try {
-    const { data: programs, error } = await SupabaseClient
-      .from('programs')
-      .select('id, name, destination_id, status, date_departure, price, currency, type')
-      .order('created_at', { ascending: false });
+    const { data: programs, error } = await _adminTimeout(
+      SupabaseClient
+        .from('programs')
+        .select('id, name, destination_id, status, date_departure, price, currency, type')
+        .order('created_at', { ascending: false })
+    );
 
     if (error) throw error;
+
+    if (!document.getElementById('admin-programs-tbody')) return;
 
     if (!programs || programs.length === 0) {
       tbody.innerHTML = `
@@ -546,6 +550,19 @@ function showAdminToast(message, type) {
 let _adminConvUnsub = null;
 let _adminConvFilter = 'all';
 let _adminActiveConvId = null;
+let _adminViewToken = 0;
+
+function _adminTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error('timeout: ' + (ms || 10000) + 'ms')), ms || 10000);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function _adminTakeToken() {
+  return ++_adminViewToken;
+}
 
 function _adminSetActiveNav(id) {
   document.querySelectorAll('.admin-sidebar__link').forEach(l => l.classList.remove('admin-sidebar__link--active'));
@@ -576,10 +593,16 @@ async function showAdminConversations(filter) {
     </div>
   `;
 
+  const token = _adminTakeToken();
+
   if (_adminConvUnsub) { _adminConvUnsub(); _adminConvUnsub = null; }
-  _adminConvUnsub = ChatService.subscribeToConversations(() => loadAdminConversations());
+  _adminConvUnsub = ChatService.subscribeToConversations(() => {
+    if (token !== _adminViewToken) return;
+    loadAdminConversations();
+  });
 
   await loadAdminConversations();
+  if (token !== _adminViewToken) return;
 }
 
 async function loadAdminConversations() {
@@ -606,7 +629,7 @@ async function loadAdminConversations() {
     const lastMsg = c.lastMessage ? c.lastMessage.message : 'لا توجد رسائل بعد';
     const lastTime = c.lastMessage ? c.lastMessage.created_at : c.updated_at;
     return `
-      <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="showAdminConversationChat('${c.id}')">
+      <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="window.location.hash='admin/chat/${c.id}'">
         <div class="admin-conv-avatar">${(cName).charAt(0)}</div>
         <div class="admin-conv-body">
           <div class="admin-conv-top">
@@ -627,6 +650,7 @@ async function loadAdminConversations() {
 
 async function showAdminConversationChat(conversationId) {
   _adminActiveConvId = conversationId;
+  const token = _adminTakeToken();
   const content = document.getElementById('admin-main-content');
   if (!content) return;
 
@@ -637,7 +661,7 @@ async function showAdminConversationChat(conversationId) {
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-<button class="admin-btn admin-btn--outline admin-btn--small" onclick="showAdminConversations()">↩ المحادثات</button>
+<button class="admin-btn admin-btn--outline admin-btn--small" onclick="window.location.hash='admin/conversations'">↩ المحادثات</button>
         <h2 class="admin-toolbar__title">المحادثة</h2>
       </div>
 
@@ -666,9 +690,13 @@ async function showAdminConversationChat(conversationId) {
   `;
 
   if (_adminConvUnsub) { _adminConvUnsub(); _adminConvUnsub = null; }
-  _adminConvUnsub = ChatService.subscribeToMessages(conversationId, () => loadAdminChatThread(conversationId));
+  _adminConvUnsub = ChatService.subscribeToMessages(conversationId, () => {
+    if (token !== _adminViewToken) return;
+    loadAdminChatThread(conversationId);
+  });
 
   await loadAdminChatThread(conversationId);
+  if (token !== _adminViewToken) return;
   ChatService.markConversationRead(conversationId);
 }
 
@@ -676,6 +704,7 @@ async function loadAdminChatThread(conversationId) {
   const thread = document.getElementById('admin-chat-thread');
   if (!thread) return;
   const messages = await ChatService.getMessages(conversationId);
+  if (!document.getElementById('admin-chat-thread')) return;
   const meId = AuthService.currentUser ? AuthService.currentUser.id : null;
 
   thread.innerHTML = messages.map(m => `
@@ -777,8 +806,10 @@ async function loadAdminBookings() {
     if (_adminBookingFilter && _adminBookingFilter !== 'all') {
       query = query.eq('status', _adminBookingFilter);
     }
-    const { data, error } = await query;
+    const { data, error } = await _adminTimeout(query);
     if (error) throw error;
+
+    if (!document.getElementById('admin-bookings-tbody')) return;
 
     if (!data || !data.length) {
       tbody.innerHTML = `<tr><td colspan="7"><div class="admin-empty"><div class="admin-empty__icon">📋</div><div class="admin-empty__title">لا توجد حجوزات${_adminBookingFilter && _adminBookingFilter !== 'all' ? ' بهذه الحالة' : ' حالياً'}</div></div></td></tr>`;
@@ -798,7 +829,7 @@ async function loadAdminBookings() {
       const st = getBookingStatusMeta(b.status);
       const prog = progMap[b.program_id];
       return `
-        <tr class="admin-booking-row" onclick="showAdminBookingDetail('${b.id}')">
+        <tr class="admin-booking-row" onclick="window.location.hash='admin/booking/${b.id}'">
           <td><strong dir="ltr">${b.order_number}</strong></td>
           <td>${escapeHtml(b.customer_name || 'زائر')}</td>
           <td>${prog ? `${prog.emoji || ''} ${escapeHtml(prog.name)}` : '-'}</td>
@@ -816,13 +847,14 @@ async function loadAdminBookings() {
 
 async function showAdminBookingDetail(bookingId) {
   _adminSetActiveNav('admin-nav-bookings');
+  const token = _adminTakeToken();
   const content = document.getElementById('admin-main-content');
   if (!content) return;
 
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="showAdminBookings()">↩ الحجوزات</button>
+        <button class="admin-btn admin-btn--outline admin-btn--small" onclick="window.location.hash='admin/bookings'">↩ الحجوزات</button>
         <h2 class="admin-toolbar__title">تفاصيل الحجز</h2>
       </div>
       <div id="admin-booking-detail">
@@ -832,12 +864,15 @@ async function showAdminBookingDetail(bookingId) {
   `;
 
   try {
-    const { data: booking, error } = await SupabaseClient
-      .from('bookings')
-      .select('*, booking_travelers(*)')
-      .eq('id', bookingId)
-      .single();
+    const { data: booking, error } = await _adminTimeout(
+      SupabaseClient
+        .from('bookings')
+        .select('*, booking_travelers(*)')
+        .eq('id', bookingId)
+        .single()
+    );
     if (error) throw error;
+    if (token !== _adminViewToken) return;
 
     let prog = null;
     let dest = null;

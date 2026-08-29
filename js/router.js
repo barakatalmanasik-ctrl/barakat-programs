@@ -15,10 +15,32 @@ const Router = {
     const page = parts[0];
 
     if (page === 'admin' && parts[1]) {
-      if (parts[1] === 'login') {
+      const adminSub = parts[1];
+      if (adminSub === 'login') {
         this.navigateToSub('admin/login');
-      } else if (parts[1] === 'dashboard') {
+        return;
+      }
+      if (adminSub === 'dashboard') {
         this.navigateToAdmin('admin/dashboard');
+        return;
+      }
+      if (!AuthService.isLoggedIn) {
+        window.location.hash = 'admin/login';
+        return;
+      }
+      // Ensure the admin dashboard shell exists before swapping panels.
+      const dash = document.getElementById('admin-dashboard-content');
+      if (!dash || !dash.querySelector('#admin-main-content')) {
+        renderAdminDashboard();
+      }
+      if (adminSub === 'conversations') {
+        showAdminConversations();
+      } else if (adminSub === 'bookings') {
+        showAdminBookings();
+      } else if (adminSub === 'chat' && parts[2]) {
+        showAdminConversationChat(parts[2]);
+      } else if (adminSub === 'booking' && parts[2]) {
+        showAdminBookingDetail(parts[2]);
       } else {
         this.navigateTo('home');
       }

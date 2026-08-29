@@ -22,6 +22,25 @@ const ChatService = {
 
   isStaff() { return ['employee', 'admin'].includes(this._role()); },
 
+  // Never let a hung Supabase call leave a spinner/freeze forever.
+  _withTimeout(promise, ms, label) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error('timeout: ' + (label || 'chat request'))), ms || 10000);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  },
+
+  _trackChannel(channel) {
+    this._channels.push(channel);
+    const client = SupabaseClient.client;
+    return () => {
+      try { client.removeChannel(channel); } catch (e) {}
+      const i = this._channels.indexOf(channel);
+      if (i >= 0) this._channels.splice(i, 1);
+    };
+  },
+
   onChange(callback) {
     this._listeners.push(callback);
     return () => { this._listeners = this._listeners.filter(l => l !== callback); };
@@ -51,22 +70,27 @@ const ChatService = {
 
       q = q.order('updated_at', { ascending: false });
 
-      const { data, error } = await q;
+      const { data, error } = await this._withTimeout(q, 10000, 'getConversations');
       if (error) throw error;
 
-      // Enrich with last message + unread count.
-      const enriched = await Promise.all((data || []).map(async (c) => {
-        const lastMsg = await this._lastMessage(c.id);
-        const unread = await this._countUnread(c.id);
-        return {
-          ...c,
-          lastMessage: lastMsg,
-          unreadCount: unread,
-          isMine: c.user_id === uid
-        };
+      // Enrich with last message + unread count (resilient: a failing
+      // sub-query must never black out the whole conversation list).
+      const results = await Promise.allSettled((data || []).map(async (c) => {
+        try {
+          const lastMsg = await this._lastMessage(c.id);
+          const unread = await this._countUnread(c.id);
+          return {
+            ...c,
+            lastMessage: lastMsg,
+            unreadCount: unread,
+            isMine: c.user_id === uid
+          };
+        } catch (err) {
+          return { ...c, lastMessage: null, unreadCount: 0, isMine: c.user_id === uid };
+        }
       }));
 
-      return enriched;
+      return results.filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
     } catch (e) {
       console.error('Get conversations error:', e);
       return [];
@@ -80,12 +104,15 @@ const ChatService = {
     if (!uid) return null;
 
     try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('booking_id', bookingId)
-        .eq('user_id', uid)
-        .maybeSingle();
+      const { data, error } = await this._withTimeout(
+        supabase
+          .from('conversations')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .eq('user_id', uid)
+          .maybeSingle(),
+        10000, 'getOrCreateConversation'
+      );
 
       if (error) throw error;
       if (data) return data;
@@ -100,18 +127,21 @@ const ChatService = {
   async _insertConversation(uid, bookingId, subject) {
     const supabase = SupabaseClient;
     const user = AuthService.currentUser;
-    const { data, error } = await supabase
-      .from('conversations')
-      .insert({
-        user_id: uid,
-        booking_id: bookingId,
-        subject: subject || '',
-        status: 'open',
-        customer_name: (user && user.name) || null,
-        customer_phone: (user && user.phone) || null
-      })
-      .select()
-      .single();
+    const { data, error } = await this._withTimeout(
+      supabase
+        .from('conversations')
+        .insert({
+          user_id: uid,
+          booking_id: bookingId,
+          subject: subject || '',
+          status: 'open',
+          customer_name: (user && user.name) || null,
+          customer_phone: (user && user.phone) || null
+        })
+        .select()
+        .single(),
+      10000, 'insertConversation'
+    );
     if (error) throw error;
     return data;
   },
@@ -119,11 +149,14 @@ const ChatService = {
   async getConversationById(id) {
     const supabase = SupabaseClient;
     try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const { data, error } = await this._withTimeout(
+        supabase
+          .from('conversations')
+          .select('*')
+          .eq('id', id)
+          .single(),
+        10000, 'getConversationById'
+      );
       if (error) throw error;
       return data;
     } catch (e) {
@@ -158,7 +191,7 @@ const ChatService = {
 
       if (before) q = q.lt('created_at', before);
 
-      const { data, error } = await q;
+      const { data, error } = await this._withTimeout(q, 10000, 'getMessages');
       if (error) throw error;
       return (data || []).reverse();
     } catch (e) {
@@ -173,14 +206,17 @@ const ChatService = {
     if (!uid || !message.trim()) return false;
 
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: uid,
-          sender_role: senderRole || this._role(),
-          message: message.trim()
-        });
+      const { error } = await this._withTimeout(
+        supabase
+          .from('messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: uid,
+            sender_role: senderRole || this._role(),
+            message: message.trim()
+          }),
+        10000, 'sendMessage'
+      );
       if (error) throw error;
       return true;
     } catch (e) {
@@ -197,12 +233,15 @@ const ChatService = {
     if (!uid) return;
 
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('conversation_id', conversationId)
-        .neq('sender_id', uid)
-        .is('read_at', null);
+      const { data, error } = await this._withTimeout(
+        supabase
+          .from('messages')
+          .update({ read_at: new Date().toISOString() })
+          .eq('conversation_id', conversationId)
+          .neq('sender_id', uid)
+          .is('read_at', null),
+        10000, 'markRead'
+      );
       if (error) throw error;
       return data;
     } catch (e) {
@@ -213,10 +252,13 @@ const ChatService = {
   async updateConversationStatus(conversationId, status) {
     const supabase = SupabaseClient;
     try {
-      const { error } = await supabase
-        .from('conversations')
-        .update({ status })
-        .eq('id', conversationId);
+      const { error } = await this._withTimeout(
+        supabase
+          .from('conversations')
+          .update({ status })
+          .eq('id', conversationId),
+        10000, 'updateConversationStatus'
+      );
       if (error) throw error;
       return { success: true };
     } catch (e) {
@@ -228,10 +270,13 @@ const ChatService = {
   async assignConversation(conversationId, employeeId) {
     const supabase = SupabaseClient;
     try {
-      const { error } = await supabase
-        .from('conversations')
-        .update({ assigned_employee: employeeId || null })
-        .eq('id', conversationId);
+      const { error } = await this._withTimeout(
+        supabase
+          .from('conversations')
+          .update({ assigned_employee: employeeId || null })
+          .eq('id', conversationId),
+        10000, 'assignConversation'
+      );
       if (error) throw error;
       return { success: true };
     } catch (e) {
@@ -252,10 +297,13 @@ const ChatService = {
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
         (payload) => { onMessage(payload.new); }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[ChatService] messages channel issue:', status);
+        }
+      });
 
-    this._channels.push(channel);
-    return () => client.removeChannel(channel);
+    return this._trackChannel(channel);
   },
 
   // Subscribe to any conversation inserted (for staff list refresh).
@@ -273,23 +321,29 @@ const ChatService = {
         { event: 'UPDATE', schema: 'public', table: 'conversations' },
         () => onChange()
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[ChatService] conversations channel issue:', status);
+        }
+      });
 
-    this._channels.push(channel);
-    return () => client.removeChannel(channel);
+    return this._trackChannel(channel);
   },
 
   // ── Internal helpers ─────────────────────────────────────────
   async _lastMessage(conversationId) {
     const supabase = SupabaseClient;
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('message, sender_role, created_at')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      const { data, error } = await this._withTimeout(
+        supabase
+          .from('messages')
+          .select('message, sender_role, created_at')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single(),
+        8000, 'lastMessage'
+      );
       if (error || !data) return null;
       return data;
     } catch (e) { return null; }
@@ -300,12 +354,15 @@ const ChatService = {
     const supabase = SupabaseClient;
     if (!uid) return 0;
     try {
-      const { count, error } = await supabase
-        .from('messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('conversation_id', conversationId)
-        .neq('sender_id', uid)
-        .is('read_at', null);
+      const { count, error } = await this._withTimeout(
+        supabase
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('conversation_id', conversationId)
+          .neq('sender_id', uid)
+          .is('read_at', null),
+        8000, 'countUnread'
+      );
       if (error) throw error;
       return count || 0;
     } catch (e) { return 0; }
