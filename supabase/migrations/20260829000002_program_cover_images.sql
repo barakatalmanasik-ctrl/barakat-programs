@@ -13,3 +13,8 @@ UPDATE programs
 SET cover_image = 'images/covers/umrah-land-1.jpeg'
 WHERE id = 'bbbbbbbb-1111-0000-0000-000000000003'::uuid
 AND COALESCE(cover_image, '') = '';
+
+UPDATE programs
+SET cover_image = 'images/covers/umrah-land-2.jpeg'
+WHERE id = 'bbbbbbbb-1111-0000-0000-000000000004'::uuid
+AND COALESCE(cover_image, '') = '';

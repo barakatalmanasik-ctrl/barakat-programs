@@ -594,7 +594,7 @@ const MockData = {
       destination: "العمرة (السعودية)",
       destinationEmoji: "🇸🇦",
       type: "religious",
-      coverImage: null,
+      coverImage: "images/covers/umrah-land-2.jpeg",
       dateDeparture: null,
       dateReturn: null,
       dateDisplay: "قريباً",
