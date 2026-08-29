@@ -24,7 +24,7 @@ function renderDetailPage(programId) {
         <button class="detail-page__hero-back" onclick="history.back()">
           <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </button>
-        <button class="detail-page__hero-share">
+        <button class="detail-page__hero-share" onclick="shareProgram('${program.id}')" aria-label="مشاركة الرابط">
           <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
         </button>
         <div class="detail-page__hero-status">
@@ -140,6 +140,39 @@ function handleBooking(programId) {
   // In-app booking flow (real Supabase). WhatsApp remains as an option
   // on the booking form and inside the booking detail page.
   window.location.hash = 'booking/' + programId;
+}
+
+function shareProgram(programId) {
+  const program = ProgramsService.getById(programId);
+  const url = 'https://barakat-al-manasik.web.app/p/' + encodeURIComponent(programId) + '/';
+  const text = 'بركات المناسك | ' + (program ? program.name : 'برامج العمرة والرحلات المميزة');
+
+  if (navigator.share) {
+    navigator.share({ title: text, text: text, url: url }).catch(function(){});
+    return;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(function(){ showShareToast('تم نسخ رابط المشاركة'); })
+      .catch(function(){ window.prompt('انسخ رابط المشاركة:', url); });
+  } else {
+    window.prompt('انسخ رابط المشاركة:', url);
+  }
+}
+
+function showShareToast(message) {
+  var prev = document.querySelector('.share-toast');
+  if (prev) prev.remove();
+  var el = document.createElement('div');
+  el.className = 'share-toast';
+  el.textContent = message;
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){ el.classList.add('share-toast--show'); });
+  setTimeout(function(){
+    el.classList.remove('share-toast--show');
+    setTimeout(function(){ el.remove(); }, 300);
+  }, 2400);
 }
 
 function toggleAccordion(header) {

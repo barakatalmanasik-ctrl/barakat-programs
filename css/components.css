@@ -1270,6 +1270,29 @@
   stroke-width: 2;
 }
 
+.share-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--color-text-primary);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+}
+
+.share-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .detail-page__hero-status {
   position: absolute;
   bottom: var(--space-lg);
