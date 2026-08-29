@@ -79,18 +79,14 @@ function renderDetailPage(programId) {
 
         ${program.includedServices && program.includedServices.length ? `
           <div class="detail-page__section">
-            <h3 class="detail-page__section-title">✅ الخدمات المشمولة</h3>
-            <ul class="detail-page__services-list detail-page__services-list--included">
-              ${program.includedServices.map(s => `<li>${s}</li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
-
-        ${program.excludedServices && program.excludedServices.length ? `
-          <div class="detail-page__section">
-            <h3 class="detail-page__section-title">❌ الخدمات غير المشمولة</h3>
-            <ul class="detail-page__services-list detail-page__services-list--excluded">
-              ${program.excludedServices.map(s => `<li>${s}</li>`).join('')}
+            <h3 class="detail-page__section-title">⭐ مميزات البرنامج</h3>
+            <ul class="detail-page__features">
+              ${program.includedServices.map(s => `
+                <li class="detail-page__feature">
+                  <svg class="detail-page__feature-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>${s}</span>
+                </li>
+              `).join('')}
             </ul>
           </div>
         ` : ''}
