@@ -65,7 +65,8 @@ function handleMenuClick(itemId) {
     orders: 'orders',
     notifications: 'notifications',
     favorites: 'favorites',
-    programs: 'programs'
+    programs: 'programs',
+    ticket: 'ticket'
   };
 
   if (pageMap[itemId]) {

@@ -622,6 +622,7 @@ const MockData = {
   menuItems: [
     { id: "profile", label: "حسابي", desc: "إدارة بياناتك الشخصية", icon: "👤", color: "var(--color-primary-50)", link: "#" },
     { id: "orders", label: "طلباتي", desc: "متابعة حجوزاتك", icon: "📦", color: "var(--color-warning-bg)", link: "#" },
+    { id: "ticket", label: "طلب حجز تذكرة", desc: "أرسل طلب تذكرة طيران عبر WhatsApp", icon: "🎟️", color: "var(--color-success-bg)", link: "#" },
     { id: "notifications", label: "الإشعارات", desc: "تنبيهات وعروض", icon: "🔔", color: "var(--color-warning-bg)", link: "#", badge: 3 },
     { id: "favorites", label: "المفضلة", desc: "البرامج المحفوظة", icon: "❤️", color: "var(--color-error-bg)", link: "#" },
     { id: "settings", label: "إعدادات الحساب", desc: "تخصيص تجربتك", icon: "⚙️", color: "var(--color-info-bg)", link: "#" },
