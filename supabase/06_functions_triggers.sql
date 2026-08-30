@@ -13,7 +13,7 @@ BEGIN
   SELECT COALESCE(MAX(CAST(SUBSTRING(order_number FROM 9) AS INTEGER)), 0) + 1
     INTO current_max
     FROM bookings
-    WHERE order_number ~ '^BK-[0-9]{4}-[0-9]+$';
+    WHERE order_number ~ '^BK-[0-9]{4}-[0-9]{5}$';
 
   EXECUTE format(
     'CREATE SEQUENCE IF NOT EXISTS bookings_order_number_seq START WITH %s',

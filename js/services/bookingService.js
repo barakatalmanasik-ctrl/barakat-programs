@@ -1,8 +1,9 @@
 // BookingService - creates real Supabase bookings for the in-app flow.
 // - When logged in, links the booking to the current user (RLS owner policies).
 // - When not logged in, creates a guest booking (user_id null, customer_* filled).
-// - Lets the database generate the order_number (BK-YYYY-NNNNN) via trigger,
-//   but falls back to a collision-resistant client-generated number on races.
+// - Sends a collision-resistant client-generated order_number (BK-YYYY-...)
+//   so guests (no account) and logged-in users both book reliably; the DB
+//   trigger stays as a fallback for rows inserted without an order_number.
 
 const BookingService = {
   async createBooking(bookingData) {
@@ -37,18 +38,19 @@ const BookingService = {
         room_type: bookingData.roomType || null
       };
 
-      // ── Insert booking (with retry on order-number collisions).
-      // The DB trigger historically generated numbers non-atomically (MAX+1),
-      // so two concurrent inserts could collide on the same order number.
-      // On a collision we retry and supply a client-generated unique number so
-      // customers aren't blocked until the DB-side sequence migration is applied.
+      // ── Insert booking with a client-generated, collision-resistant
+      // order_number. The DB trigger generates numbers from MAX(..)+1 under
+      // the caller's RLS, so GUEST visitors (no account, auth.uid() = null)
+      // can never read existing bookings and always produce the same number
+      // (e.g. BK-2026-00001) -> they hit the unique constraint on every submit.
+      // Supplying order_number ourselves skips that trigger (its WHEN clause
+      // only fires when order_number is NULL/'') and makes guest bookings work
+      // with no DB-side migration needed.
       let booking, bookingError;
-      let clientOrderNumber = null;
+      let clientOrderNumber = BookingService._generateOrderNumber();
       const MAX_BOOKING_ATTEMPTS = 3;
       for (let attempt = 1; attempt <= MAX_BOOKING_ATTEMPTS; attempt++) {
-        const attemptRow = clientOrderNumber
-          ? Object.assign({}, row, { order_number: clientOrderNumber })
-          : row;
+        const attemptRow = Object.assign({}, row, { order_number: clientOrderNumber });
         const res = await supabase
           .from('bookings')
           .insert(attemptRow)
@@ -63,7 +65,7 @@ const BookingService = {
         if (!collided) break;
 
         if (attempt < MAX_BOOKING_ATTEMPTS) {
-          if (!clientOrderNumber) clientOrderNumber = BookingService._generateOrderNumber();
+          clientOrderNumber = BookingService._generateOrderNumber();
           await new Promise(resolve => setTimeout(resolve, 400 * attempt + Math.round(Math.random() * 200)));
         }
       }
