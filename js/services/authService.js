@@ -181,6 +181,8 @@ const AuthService = {
         let msg = error.message;
         if (msg.includes('already registered')) msg = 'البريد الإلكتروني مسجل مسبقاً';
         if (msg.includes('valid email')) msg = 'البريد الإلكتروني غير صحيح';
+        if (msg.includes('rate limit') || msg.toLowerCase().includes('rate_limit')) msg = 'تم استخدام حد إرسال البريد مؤقتاً، يرجى المحاولة بعد قليل';
+        if (msg.includes('Database error saving new user')) msg = 'تعذر إنشاء الحساب حالياً، يرجى المحاولة لاحقاً';
         return { success: false, error: msg };
       }
 
