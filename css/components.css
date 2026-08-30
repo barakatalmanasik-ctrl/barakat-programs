@@ -3674,6 +3674,113 @@
   flex-shrink: 0;
 }
 
+.whatsapp-modal__subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.whatsapp-modal__stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.whatsapp-modal__stepper-btn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.whatsapp-modal__stepper-btn:hover {
+  border-color: var(--color-primary);
+}
+
+.whatsapp-modal__stepper-btn:active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.whatsapp-modal__stepper-value {
+  min-width: 64px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.whatsapp-modal__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.whatsapp-modal__error {
+  display: none;
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  margin-top: var(--space-xs);
+}
+
+.whatsapp-modal__error--show {
+  display: block;
+}
+
+.whatsapp-modal__questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.whatsapp-modal__question {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface-variant);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.whatsapp-modal__question:hover {
+  border-color: var(--color-primary);
+}
+
+.whatsapp-modal__question:active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.whatsapp-modal__question--custom {
+  border-style: dashed;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.whatsapp-modal__custom {
+  display: none;
+  margin-top: var(--space-lg);
+}
+
+.whatsapp-modal__custom--show {
+  display: block;
+}
+
 
 /* ============================================================
    PHASE 5: In-app booking + support chat
