@@ -148,7 +148,8 @@ CREATE POLICY favorites_select_own ON favorites FOR SELECT USING (user_id = auth
 DROP POLICY IF EXISTS favorites_insert_own ON favorites;
 CREATE POLICY favorites_insert_own ON favorites FOR INSERT WITH CHECK (user_id = auth.uid());
 
-DROP POLICY IF EXISTS favorites_delete_own ON favorites FOR DELETE USING (user_id = auth.uid());
+DROP POLICY IF EXISTS favorites_delete_own ON favorites;
+CREATE POLICY favorites_delete_own ON favorites FOR DELETE USING (user_id = auth.uid());
 
 -- ─── 8. ENSURE NOTIFICATIONS TABLE + RLS ────────────────────
 CREATE TABLE IF NOT EXISTS notifications (
@@ -172,7 +173,8 @@ CREATE POLICY notifications_select_own ON notifications FOR SELECT USING (user_i
 DROP POLICY IF EXISTS notifications_update_own ON notifications;
 CREATE POLICY notifications_update_own ON notifications FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 
-DROP POLICY IF EXISTS notifications_delete_own ON notifications FOR DELETE USING (user_id = auth.uid());
+DROP POLICY IF EXISTS notifications_delete_own ON notifications;
+CREATE POLICY notifications_delete_own ON notifications FOR DELETE USING (user_id = auth.uid());
 
 DROP POLICY IF EXISTS notifications_insert_policy ON notifications;
 CREATE POLICY notifications_insert_policy ON notifications FOR INSERT
