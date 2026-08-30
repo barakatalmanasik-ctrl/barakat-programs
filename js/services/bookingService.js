@@ -36,11 +36,30 @@ const BookingService = {
         room_type: bookingData.roomType || null
       };
 
-      const { data: booking, error: bookingError } = await supabase
-        .from('bookings')
-        .insert(row)
-        .select()
-        .single();
+      // ── Insert booking (with retry on order-number races).
+      // The DB trigger used to generate numbers non-atomically (MAX+1):
+      // two concurrent inserts could collide on the same order number.
+      // We retry briefly so customers aren't blocked during collisions.
+      let booking, bookingError;
+      const MAX_BOOKING_ATTEMPTS = 3;
+      for (let attempt = 1; attempt <= MAX_BOOKING_ATTEMPTS; attempt++) {
+        const res = await supabase
+          .from('bookings')
+          .insert(row)
+          .select()
+          .single();
+        booking = res.data;
+        bookingError = res.error;
+
+        const collided = bookingError &&
+          (bookingError.code === '23505' ||
+           /bookings_order_number_key/i.test(String(bookingError.message || '')));
+        if (!collided) break;
+
+        if (attempt < MAX_BOOKING_ATTEMPTS) {
+          await new Promise(resolve => setTimeout(resolve, 400 * attempt + Math.round(Math.random() * 200)));
+        }
+      }
 
       if (bookingError) throw bookingError;
 
@@ -71,9 +90,13 @@ const BookingService = {
       };
     } catch (e) {
       console.error('Booking creation error:', e);
+      const msg = String((e && e.message) || '');
+      if (e && e.code === '23505') {
+        return { success: false, error: 'حدث تعارض مؤقت في إرسال الطلب. يرجى المحاولة مرة أخرى سريعاً.' };
+      }
       return {
         success: false,
-        error: e.message || 'حدث خطأ أثناء إرسال طلب الحجز'
+        error: (msg && !['[object Object]', '{}'].includes(msg)) ? msg : 'حدث خطأ أثناء إرسال طلب الحجز'
       };
     }
   },
