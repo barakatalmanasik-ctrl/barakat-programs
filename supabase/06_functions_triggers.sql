@@ -5,19 +5,31 @@
 -- ============================================================
 
 -- ─── GENERATE BOOKING ORDER NUMBER ───────────────────────────
+-- Generated from a SEQUENCE (atomic, race-free) as BK-YYYY-NNNNN.
+
+DO $$
+DECLARE current_max INTEGER;
+BEGIN
+  SELECT COALESCE(MAX(CAST(SUBSTRING(order_number FROM 9) AS INTEGER)), 0) + 1
+    INTO current_max
+    FROM bookings
+    WHERE order_number ~ '^BK-[0-9]{4}-[0-9]+$';
+
+  EXECUTE format(
+    'CREATE SEQUENCE IF NOT EXISTS bookings_order_number_seq START WITH %s',
+    current_max
+  );
+END $$;
 
 CREATE OR REPLACE FUNCTION generate_order_number()
 RETURNS TRIGGER AS $$
 DECLARE
-  seq INTEGER;
+  bok_year TEXT;
+  bok_seq  INTEGER;
 BEGIN
-  SELECT COALESCE(MAX(
-    CAST(SUBSTRING(order_number FROM 5) AS INTEGER)
-  ), 0) + 1
-  INTO seq
-  FROM bookings;
-
-  NEW.order_number = 'ORD-' || LPAD(seq::TEXT, 6, '0');
+  SELECT to_char(now(), 'YYYY') INTO bok_year;
+  bok_seq := nextval('bookings_order_number_seq');
+  NEW.order_number := 'BK-' || bok_year || '-' || LPAD(bok_seq::TEXT, 5, '0');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
