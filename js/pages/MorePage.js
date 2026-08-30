@@ -70,7 +70,14 @@ function handleMenuClick(itemId) {
 
   if (pageMap[itemId]) {
     navigateToPage(pageMap[itemId]);
-  } else {
-    alert('قريباً إن شاء الله');
+    return;
   }
+
+  if (itemId === 'contact') {
+    const link = SiteSettings.whatsAppLink('السلام عليكم، أود التواصل مع شركة بركات المناسك.');
+    if (link) window.open(link, '_blank', 'noopener');
+    return;
+  }
+
+  alert('قريباً إن شاء الله');
 }

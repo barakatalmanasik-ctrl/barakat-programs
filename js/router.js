@@ -12,8 +12,8 @@
 const Router = {
   currentPage: 'home',
   currentDetailId: null,
-  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login', 'booking', 'booking-success', 'booking-detail', 'chat'],
-  authRequired: ['profile', 'orders', 'notifications', 'favorites', 'booking-detail', 'chat'],
+  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login', 'booking-detail'],
+  authRequired: ['profile', 'orders', 'notifications', 'favorites', 'booking-detail'],
 
   _stack: [],
   _forward: false,
@@ -119,9 +119,6 @@ const Router = {
     // Cleanup page-level realtime subscriptions when leaving a page, so old
     // listeners never refresh a hidden DOM or keep a tab busy (freezes).
     const last = this._lastRoute || '';
-    if (last.startsWith('chat') && !route.startsWith('chat')) {
-      if (window.cleanupChatPage) window.cleanupChatPage();
-    }
     if ((route.startsWith('admin') && route !== last) || (last.startsWith('admin') && !route.startsWith('admin'))) {
       if (window.adminCleanupSubscriptions) window.adminCleanupSubscriptions();
     }
@@ -142,14 +139,12 @@ const Router = {
         this._ensureAdminShell();
       } else {
         this._ensureAdminShell();
-        if (adminSub === 'conversations') {
-          showAdminConversations();
-        } else if (adminSub === 'chat' && parts[2]) {
-          showAdminConversationChat(parts[2]);
-        } else if (adminSub === 'bookings') {
+        if (adminSub === 'bookings') {
           showAdminBookings();
         } else if (adminSub === 'booking' && parts[2]) {
           showAdminBookingDetail(parts[2]);
+        } else if (adminSub === 'settings') {
+          showAdminSettings();
         } else {
           this.replace('admin/dashboard');
           return;
@@ -158,15 +153,17 @@ const Router = {
     } else if (page === 'detail' && parts[1]) {
       this.navigateTo('detail', decodeURIComponent(parts[1]));
     } else if (page === 'booking' && parts[1]) {
-      this.navigateToSub('booking', decodeURIComponent(parts[1]));
+      // Booking is now WhatsApp-only: old "#booking/<id>" deep links
+      // (bookmarked or shared) open the program page directly.
+      this.replace('detail/' + decodeURIComponent(parts[1]));
     } else if (page === 'booking-success' && parts[1]) {
-      this.navigateToSub('booking-success', decodeURIComponent(parts[1]));
+      this.replace(AuthService.isLoggedIn ? 'orders' : 'home');
     } else if (page === 'booking-detail' && parts[1]) {
       if (!AuthService.isLoggedIn) { this.replace('login'); return; }
       this.navigateToSub('booking-detail', parts[1]);
     } else if (page === 'chat' && parts[1]) {
-      if (!AuthService.isLoggedIn) { this.replace('login'); return; }
-      this.navigateToSub('chat', parts[1]);
+      // In-app chat has been removed; go back to the orders list.
+      this.replace(AuthService.isLoggedIn ? 'orders' : 'home');
     } else if (this.subPages.includes(page)) {
       if (this.authRequired.includes(page) && !AuthService.isLoggedIn) {
         this.replace('login');
@@ -285,10 +282,7 @@ const Router = {
       case 'notifications': renderNotificationsPage(); break;
       case 'favorites': renderFavoritesPage(); break;
       case 'admin/login': renderAdminLoginPage(); break;
-      case 'booking': renderBookingFormPage(param); break;
-      case 'booking-success': renderBookingSuccessPage(param); break;
       case 'booking-detail': renderBookingDetailPage(param); break;
-      case 'chat': renderChatPage(param); break;
     }
   },
 

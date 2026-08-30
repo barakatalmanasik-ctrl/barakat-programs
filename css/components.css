@@ -1665,6 +1665,38 @@
   transition: all var(--transition-fast);
 }
 
+.detail-page__booking-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.detail-page__booking-btn--whatsapp {
+  background: #25D366;
+  color: #fff;
+}
+
+.detail-page__booking-btn--whatsapp:hover {
+  background: #1EBE57;
+}
+
+.detail-page__booking-btn--whatsapp svg {
+  width: 18px;
+  height: 18px;
+  vertical-align: -3px;
+  margin-left: 6px;
+}
+
+.detail-page__booking-btn--outline {
+  background: transparent;
+  color: var(--color-secondary);
+  border: 1.5px solid var(--color-secondary);
+}
+
+.detail-page__booking-btn--outline:hover {
+  background: var(--color-secondary-soft, rgba(192, 164, 40, 0.08));
+}
+
 .detail-page__booking-btn:hover {
   background: var(--color-primary-light);
 }

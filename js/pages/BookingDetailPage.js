@@ -162,8 +162,7 @@ async function renderBookingDetailPage(bookingId) {
     <div class="bd-card">
       <div class="bd-card__title">💬 الدعم</div>
       <div class="bd-support-actions">
-        <button class="bd-btn bd-btn--primary" onclick="openBookingChat('${booking.id}')">مراسلة الدعم</button>
-        <button class="bd-btn bd-btn--outline" onclick="openWhatsAppBookingSupport('${booking.id}')">التواصل عبر واتساب</button>
+        <button class="bd-btn bd-btn--primary" onclick="openWhatsAppBookingSupport('${booking.id}')">متابعة الطلب عبر WhatsApp</button>
       </div>
     </div>
 
@@ -178,27 +177,16 @@ function isStaffUser() {
   return !!(u && ['employee', 'admin'].includes(u.role));
 }
 
-async function openBookingChat(bookingId) {
-  const user = AuthService.currentUser;
-  if (!user) { navigateToPage('login'); return; }
-
-  const booking = await BookingService.getBookingById(bookingId);
-  const subject = booking ? ('حجز ' + booking.order_number) : 'استفسار عام';
-
-  const conv = await ChatService.getOrCreateConversation(bookingId, subject);
-  if (!conv) { alert('تعذر فتح المحادثة، يرجى المحاولة مرة أخرى'); return; }
-  Router.go('chat/' + conv.id);
-}
-
 function openWhatsAppBookingSupport(bookingId) {
   const booking = _currentDetailBooking;
   const orderNo = booking ? booking.order_number : '';
   const user = AuthService.currentUser;
-  const text = encodeURIComponent(
-    `السلام عليكم، أستفسر بخصوص الحجز رقم ${orderNo || ''}.` +
-    (user ? `\nالاسم: ${user.name}\nرقم الهاتف: ${user.phone || ''}` : '')
-  );
-  window.open('https://wa.me/9647730332831?text=' + text, '_blank');
+  const msg =
+    'السلام عليكم، أستفسر بخصوص الحجز رقم ' + (orderNo || '') + '.\n' +
+    (user && user.name ? 'الاسم: ' + user.name + '\n' : '') +
+    (user && user.phone ? 'رقم الهاتف: ' + user.phone : '');
+  const link = SiteSettings.whatsAppLink(msg);
+  if (link) window.open(link, '_blank', 'noopener');
 }
 
 async function cancelBookingFromDetail(bookingId) {

@@ -14,13 +14,13 @@ function renderAdminDashboard() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             لوحة التحكم
           </a>
-          <a class="admin-sidebar__link" href="#admin/conversations" id="admin-nav-conversations" onclick="closeAdminSidebar()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-            المحادثات
-          </a>
           <a class="admin-sidebar__link" href="#admin/bookings" id="admin-nav-bookings" onclick="closeAdminSidebar()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
             الحجوزات
+          </a>
+          <a class="admin-sidebar__link" href="#admin/settings" id="admin-nav-settings" onclick="closeAdminSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            الإعدادات
           </a>
         </nav>
       </aside>
@@ -712,10 +712,9 @@ function showAdminToast(message, type) {
 
 
 // ============================================================
-// PHASE 5: Support dashboard (المحادثات) + Bookings management
+// PHASE 5: Settings (الإعدادات) + Bookings management
 // ============================================================
 
-let _adminConvUnsub = null;
 let _adminConvFilter = 'all';
 let _adminActiveConvId = null;
 let _adminViewToken = 0;
@@ -740,19 +739,13 @@ function _adminSetActiveNav(id) {
 }
 
 // Called by the router when leaving any admin section: invalidate pending
-// renders and stop realtime subscriptions (prevents stale listeners/refresh
-// loops that can freeze the tab).
+// renders so stale content is never applied after navigation.
 function adminCleanupSubscriptions() {
   _adminViewToken++; // invalidate in-flight renders
-  if (_adminConvUnsub) {
-    try { _adminConvUnsub(); } catch (e) {}
-    _adminConvUnsub = null;
-  }
 }
 
-async function showAdminConversations(filter) {
-  _adminSetActiveNav('admin-nav-conversations');
-  _adminConvFilter = filter || _adminConvFilter || 'all';
+function showAdminSettings() {
+  _adminSetActiveNav('admin-nav-settings');
 
   const content = document.getElementById('admin-main-content');
   if (!content) return;
@@ -760,175 +753,39 @@ async function showAdminConversations(filter) {
   content.innerHTML = `
     <div class="admin-panel">
       <div class="admin-toolbar">
-        <h2 class="admin-toolbar__title">المحادثات</h2>
+        <h2 class="admin-toolbar__title">الإعدادات</h2>
       </div>
-      <div class="admin-conv-filters">
-        ${[['all','الكل'],['open','مفتوحة'],['pending','قيد المعالجة'],['resolved','تم الحل'],['closed','إغلاق']].map(([k,l]) =>
-          `<button class="admin-conv-filter ${_adminConvFilter===k?'admin-conv-filter--active':''}" onclick="showAdminConversations('${k}')">${l}</button>`
-        ).join('')}
-      </div>
-      <div class="admin-conv-list" id="admin-conv-list">
-        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">جارٍ تحميل المحادثات...</div>
+      <div class="admin-booking-card">
+        <div class="admin-booking-card__title">📱 رقم واتساب الشركة</div>
+        <div class="admin-booking-row"><span>الرقم الذي تُرسل إليه طلبات الحجز والاستفسارات عبر WhatsApp</span></div>
+        <div class="admin-form__group" style="margin-top:14px">
+          <label class="admin-form__label">رقم واتساب (بصيغة دولية بدون +، مثال: 9647730332831)</label>
+          <input type="tel" class="admin-form__input" id="admin-settings-wa" dir="ltr" style="text-align:right">
+        </div>
+        <div style="margin-top:14px">
+          <button class="admin-btn admin-btn--primary" onclick="saveAdminSettings()">حفظ الإعدادات</button>
+        </div>
+        <div id="admin-settings-msg" class="admin-booking-row" style="margin-top:10px"></div>
       </div>
     </div>
   `;
 
-  const token = _adminTakeToken();
-
-  if (_adminConvUnsub) { _adminConvUnsub(); _adminConvUnsub = null; }
-  _adminConvUnsub = ChatService.subscribeToConversations(() => {
-    if (token !== _adminViewToken) return;
-    loadAdminConversations();
-  });
-
-  await loadAdminConversations();
-  if (token !== _adminViewToken) return;
+  const input = document.getElementById('admin-settings-wa');
+  if (input) input.value = SiteSettings.getWhatsAppNumber();
 }
 
-async function loadAdminConversations() {
-  const list = document.getElementById('admin-conv-list');
-  if (!list) return;
-
-  const convs = await ChatService.getConversations(_adminConvFilter);
-
-  if (!convs.length) {
-    list.innerHTML = `
-<div class="admin-empty">
-        <div class="admin-empty__icon">💬</div>
-        <div class="admin-empty__title">لا توجد محادثات</div>
-        <div class="admin-empty__text">عند تواصل الزبائن معك ستظهر المحادثات هنا</div>
-      </div>
-    `;
+function saveAdminSettings() {
+  const input = document.getElementById('admin-settings-wa');
+  const msg = document.getElementById('admin-settings-msg');
+  const raw = input ? input.value.trim() : '';
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) {
+    if (msg) { msg.textContent = 'يرجى إدخال رقم واتساب صالح'; msg.style.color = '#C0392B'; }
     return;
   }
-
-  list.innerHTML = convs.map(c => {
-    const st = getConversationStatusMeta(c.status);
-    const cName = c.customer_name || 'عميل';
-    const bookingNo = c.booking ? c.booking.order_number : '';
-    const lastMsg = c.lastMessage ? c.lastMessage.message : 'لا توجد رسائل بعد';
-    const lastTime = c.lastMessage ? c.lastMessage.created_at : c.updated_at;
-    return `
-      <div class="admin-conv-row ${c.unreadCount > 0 ? 'admin-conv-row--unread' : ''}" onclick="Router.go('admin/chat/${c.id}')">
-        <div class="admin-conv-avatar">${(cName).charAt(0)}</div>
-        <div class="admin-conv-body">
-          <div class="admin-conv-top">
-            <span class="admin-conv-name">${escapeHtml(cName)}</span>
-            ${bookingNo ? `<span class="admin-conv-booking" dir="ltr">${bookingNo}</span>` : ''}
-          </div>
-          <div class="admin-conv-last">${escapeHtml(lastMsg)}</div>
-          <div class="admin-conv-sub">
-            <span class="admin-conv-time">${formatChatTime(lastTime)}</span>
-            <span class="admin-conv-status admin-conv-status--${c.status}">${st.label}</span>
-          </div>
-        </div>
-        ${c.unreadCount > 0 ? `<span class="admin-conv-badge">${c.unreadCount}</span>` : ''}
-      </div>
-    `;
-  }).join('');
-}
-
-async function showAdminConversationChat(conversationId) {
-  _adminActiveConvId = conversationId;
-  const token = _adminTakeToken();
-  const content = document.getElementById('admin-main-content');
-  if (!content) return;
-
-  const conv = await ChatService.getConversationById(conversationId);
-  const st = getConversationStatusMeta(conv ? conv.status : 'open');
-  const isClosed = conv && conv.status === 'closed';
-
-  content.innerHTML = `
-    <div class="admin-panel">
-      <div class="admin-toolbar">
-<button class="admin-btn admin-btn--outline admin-btn--small" onclick="Router.go('admin/conversations')">↩ المحادثات</button>
-        <h2 class="admin-toolbar__title">المحادثة</h2>
-      </div>
-
-      <div class="admin-chat-meta">
-        <span class="admin-conv-status admin-conv-status--${conv ? conv.status : 'open'}">${st.label}</span>
-        ${conv && conv.subject ? `<span>${escapeHtml(conv.subject)}</span>` : ''}
-        ${conv && conv.booking ? `<span dir="ltr">${conv.booking.order_number}</span>` : ''}
-      </div>
-
-      <div class="admin-chat-status-actions">
-<button class="admin-btn admin-btn--small ${conv&&conv.status==='open'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','open')">مفتوحة</button>
-        <button class="admin-btn admin-btn--small ${conv&&conv.status==='pending'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','pending')">قيد المعالجة</button>
-        <button class="admin-btn admin-btn--small ${conv&&conv.status==='resolved'?'admin-btn--primary':''}" onclick="adminSetConvStatus('${conversationId}','resolved')">تم الحل</button>
-        <button class="admin-btn admin-btn--small admin-btn--danger ${conv&&conv.status==='closed'?'':''}" onclick="adminSetConvStatus('${conversationId}','closed')">إغلاق</button>
-      </div>
-
-      <div class="admin-chat-thread" id="admin-chat-thread">
-        <div style="padding:40px;text-align:center;color:var(--color-text-tertiary)">جارٍ تحميل الرسائل...</div>
-      </div>
-
-      <div class="admin-chat-composer">
-<textarea class="admin-chat-input" id="admin-chat-input" rows="2" placeholder="اكتب رسالة..." ${isClosed ? 'disabled' : ''}></textarea>
-        <button class="admin-btn admin-btn--primary" onclick="adminSendReply()" ${isClosed ? 'disabled' : ''}>إرسال</button>
-      </div>
-    </div>
-  `;
-
-  if (_adminConvUnsub) { _adminConvUnsub(); _adminConvUnsub = null; }
-  _adminConvUnsub = ChatService.subscribeToMessages(conversationId, () => {
-    if (token !== _adminViewToken) return;
-    loadAdminChatThread(conversationId);
-  });
-
-  await loadAdminChatThread(conversationId);
-  if (token !== _adminViewToken) return;
-  ChatService.markConversationRead(conversationId);
-}
-
-async function loadAdminChatThread(conversationId) {
-  const thread = document.getElementById('admin-chat-thread');
-  if (!thread) return;
-  const messages = await ChatService.getMessages(conversationId);
-  if (!document.getElementById('admin-chat-thread')) return;
-  const meId = AuthService.currentUser ? AuthService.currentUser.id : null;
-
-  thread.innerHTML = messages.map(m => `
-    <div class="admin-chat-msg admin-chat-msg--${m.sender_id === meId ? 'mine' : 'theirs'}">
-      <div class="admin-chat-msg__bubble">
-        <div class="admin-chat-msg__text">${escapeHtml(m.message)}</div>
-        <div class="admin-chat-msg__meta">
-${m.sender_id === meId ? (m.read_at ? '✓' : '○') : `· ${m.sender_role === 'customer' ? 'الزبون' : 'الموظف'}`}
-          · ${formatChatTime(m.created_at)}
-        </div>
-      </div>
-    </div>
-  `).join('') || '<div class="admin-empty" style="padding:30px">لا توجد رسائل بعد</div>';
-
-  thread.scrollTop = thread.scrollHeight;
-}
-
-async function adminSendReply() {
-  const input = document.getElementById('admin-chat-input');
-  const text = input ? input.value.trim() : '';
-  if (!text || !_adminActiveConvId) return;
-
-  const ok = await ChatService.sendMessage(_adminActiveConvId, text, ChatService.isStaff() ? 'employee' : 'admin');
-  if (ok) {
-    input.value = '';
-    loadAdminChatThread(_adminActiveConvId);
-    // Auto-resolve when staff replies.
-    await ChatService.updateConversationStatus(_adminActiveConvId, 'resolved');
-    loadAdminConversations();
-  }
-}
-
-async function adminSetConvStatus(conversationId, status) {
-  await ChatService.updateConversationStatus(conversationId, status);
-  showAdminConversationChat(conversationId);
-  loadAdminConversations();
-}
-
-function getConversationStatusMeta(status) {
-  const map = {
-open: { label: 'مفتوحة' }, pending: { label: 'قيد المعالجة' },
-    resolved: { label: 'تم الحل' }, closed: { label: 'إغلاق' }
-  };
-  return map[status] || { label: status };
+  SiteSettings.set('whatsappNumber', digits);
+  if (msg) { msg.textContent = '✔ تم حفظ رقم الواتساب بنجاح'; msg.style.color = '#2D7A3A'; }
+  showAdminToast('تم حفظ رقم الواتساب', 'success');
 }
 
 let _adminBookingFilter = 'all';

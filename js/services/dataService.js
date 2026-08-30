@@ -3,6 +3,15 @@
 // (favorites / notifications / bookings) when Supabase is configured.
 // Falls back to localStorage when Supabase is unavailable.
 
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function _sb() {
   return (typeof SupabaseClient !== 'undefined' && SupabaseClient.isConfigured)
     ? SupabaseClient
