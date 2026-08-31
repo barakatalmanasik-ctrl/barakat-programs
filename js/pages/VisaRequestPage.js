@@ -21,18 +21,10 @@ function renderVisaRequestPage() {
       </div>
 
       <div class="visa-page__card">
-        <div class="ticket-page__field">
-          <label class="ticket-page__label"><span class="ticket-page__label-icon">🛂</span> نوع الفيزا</label>
-          <div class="visa-page__types">
-            <div class="visa-page__type visa-page__type--active visa-page__type--single">
-              <span class="visa-page__type-icon">🛂</span>
-              <span class="visa-page__type-label">سياحية فورية</span>
-            </div>
-          </div>
-        </div>
+        <div class="ticket-page__user-note">اطلب فيزا عبر واتساب بسهولة — ننسّق لك التفاصيل والمستندات لاحقاً.</div>
 
         <div class="ticket-page__field">
-          <label class="ticket-page__label"><span class="ticket-page__label-icon">🌍</span> الجهة / البلد المسافر إليه</label>
+          <label class="ticket-page__label"><span class="ticket-page__label-icon">🌍</span> البلد المسافر إليه</label>
           <input type="text" class="ticket-page__input" id="visa-country" placeholder="مثال: إيران، تركيا، الإمارات…" />
         </div>
 
@@ -136,10 +128,6 @@ function _visaShowError(message) {
   if (err) err.textContent = message || '';
 }
 
-function _visaTypeLabel() {
-  return 'سياحية فورية';
-}
-
 // ── WhatsApp submit ─────────────────────────────────────────────────
 // Pure message builder (testable without the DOM).
 function _visaDurationLabel(duration, unit) {
@@ -157,7 +145,6 @@ function buildVisaInquiryMessage(data) {
   const lines = [
     'السلام عليكم، أرغب بالاستفسار عن إصدار فيزا:',
     '',
-    'نوع الفيزا: ' + _visaTypeLabel(),
     'البلد المسافر إليه: ' + (data.country || 'غير محدد'),
     'الجنسية: ' + (data.nationality || 'غير محددة'),
     'المدة المطلوبة: ' + _visaDurationLabel(data.duration, data.unit),
@@ -194,7 +181,6 @@ function submitVisaRequest() {
   const travelers = parseInt(travelersEl ? travelersEl.textContent : '1', 10) || 1;
 
   const message = buildVisaInquiryMessage({
-    type: 'tourist',
     unit: _visaUnit,
     duration: duration,
     travelers: travelers,

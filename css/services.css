@@ -328,63 +328,6 @@
   border-color: var(--color-secondary);
 }
 
-/* Visa types */
-.visa-page__types {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--space-sm);
-}
-
-.visa-page__type {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-md) var(--space-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  font-family: var(--font-family);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-align: center;
-}
-
-.visa-page__type:hover {
-  border-color: var(--color-primary-100);
-  box-shadow: var(--shadow-sm);
-}
-
-.visa-page__type--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-}
-
-.visa-page__type-icon {
-  font-size: var(--font-size-xl);
-}
-
-.visa-page__type-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.visa-page__type--active .visa-page__type-label {
-  color: #fff;
-}
-
-.visa-page__type--single {
-  width: 100%;
-  cursor: default;
-}
-
-.visa-page__type--single:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-}
-
 /* Text input + select fields */
 .ticket-page__select-wrap {
   position: relative;
@@ -430,10 +373,4 @@
   justify-content: center;
   gap: var(--space-md);
   margin-top: var(--space-sm);
-}
-
-@media (max-width: 480px) {
-  .visa-page__types {
-    grid-template-columns: 1fr;
-  }
 }

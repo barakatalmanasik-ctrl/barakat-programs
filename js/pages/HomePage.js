@@ -5,8 +5,9 @@ function renderHomePage() {
 
   container.innerHTML = `
     <div class="welcome-section">
-      <div class="welcome-section__greeting">مرحباً بك</div>
-      <h1 class="welcome-section__name">اكتشف رحلتك المثالية</h1>
+      <div class="welcome-section__greeting">بركات المناسك للسفر والسياحة</div>
+      <h1 class="welcome-section__name">رحلتك المثالية تبدأ من هنا</h1>
+      <p class="welcome-section__subtitle">برامج عمرة وزيارة، تذاكر طيران، حجوزات فنادق وإصدار فيزا — خطط وأرسل طلبك وكل ما يلزمك عبر واتساب.</p>
     </div>
 
     <div class="section" style="padding-top: 0">
@@ -23,8 +24,8 @@ function renderHomePage() {
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           </span>
           <span class="home-categories__body">
-            <span class="home-categories__title">🕌 البرامج السياحية</span>
-            <span class="home-categories__desc">اكتشف برامجنا السياحية والرحلات القادمة</span>
+            <span class="home-categories__title">البرامج السياحية</span>
+            <span class="home-categories__desc">اكتشف برامج عمرة وزيارة والرحلات القادمة</span>
           </span>
           <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
@@ -33,7 +34,7 @@ function renderHomePage() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.34 9.4a2 2 0 0 1 1.42-2.54l12.92-3.34a2 2 0 0 1 2.45 2.45l-3.34 12.92a2 2 0 0 1-2.54 1.42L10 15l-1.5-3L6.6 11.5 3.5 9.9a2 2 0 0 1-.16-.5z"/><path d="M5.5 13.5 8 15.5"/></svg>
           </span>
           <span class="home-categories__body">
-            <span class="home-categories__title">✈️ تذاكر الطيران</span>
+            <span class="home-categories__title">تذاكر الطيران</span>
             <span class="home-categories__desc">ابحث عن تذكرتك واستفسر عن الرحلات المتوفرة</span>
           </span>
           <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -43,7 +44,7 @@ function renderHomePage() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M15 9h4a2 2 0 0 1 2 2v10"/><line x1="9" y1="7" x2="9" y2="9"/><line x1="11" y1="7" x2="11" y2="9"/></svg>
           </span>
           <span class="home-categories__body">
-            <span class="home-categories__title">🏨 حجز فندق</span>
+            <span class="home-categories__title">حجز فندق</span>
             <span class="home-categories__desc">أرسل طلبك وأفضل الخيارات عبر واتساب</span>
           </span>
           <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -53,7 +54,7 @@ function renderHomePage() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           </span>
           <span class="home-categories__body">
-            <span class="home-categories__title">🛂 طلب فيزا</span>
+            <span class="home-categories__title">طلب فيزا</span>
             <span class="home-categories__desc">استفسر عن إصدار الفيزا بسهولة</span>
           </span>
           <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
