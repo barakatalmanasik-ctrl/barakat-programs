@@ -4490,6 +4490,16 @@ background: var(--color-surface);
   color: #fff;
 }
 
+.home-categories__icon--hotels {
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+.home-categories__icon--visa {
+  background: var(--color-primary-light);
+  color: #fff;
+}
+
 .home-categories__body {
   flex: 1;
   display: flex;

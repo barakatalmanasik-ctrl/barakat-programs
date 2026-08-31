@@ -40,6 +40,8 @@ async function initApp() {
 
   setupBottomNavListeners();
 
+  if (window.PWA) PWA.init();
+
   NotificationsService.onChange(() => {
     const badge = document.querySelector('.notifications-page__badge');
     if (badge) {

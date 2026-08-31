@@ -12,7 +12,7 @@
 const Router = {
   currentPage: 'home',
   currentDetailId: null,
-  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login', 'booking-detail', 'ticket'],
+  subPages: ['login', 'register', 'profile', 'orders', 'notifications', 'favorites', 'forgot-password', 'admin/login', 'booking-detail', 'ticket', 'hotels', 'visa'],
   authRequired: ['profile', 'orders', 'notifications', 'favorites', 'booking-detail'],
 
   _stack: [],
@@ -304,6 +304,8 @@ const Router = {
       case 'admin/login': renderAdminLoginPage(); break;
       case 'booking-detail': renderBookingDetailPage(param); break;
       case 'ticket': renderTicketPage(); break;
+      case 'hotels': renderHotelBookingPage(); break;
+      case 'visa': renderVisaRequestPage(); break;
     }
   },
 

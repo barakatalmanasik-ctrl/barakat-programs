@@ -14,6 +14,9 @@ function renderHomePage() {
     </div>
 
     <div class="section" style="padding-top: 0">
+      <div class="section__header">
+        <h2 class="section__title">خدماتنا</h2>
+      </div>
       <div class="home-categories">
         <a class="home-categories__card" href="#programs">
           <span class="home-categories__icon home-categories__icon--programs">
@@ -32,6 +35,26 @@ function renderHomePage() {
           <span class="home-categories__body">
             <span class="home-categories__title">✈️ تذاكر الطيران</span>
             <span class="home-categories__desc">ابحث عن تذكرتك واستفسر عن الرحلات المتوفرة</span>
+          </span>
+          <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a class="home-categories__card" href="#hotels">
+          <span class="home-categories__icon home-categories__icon--hotels">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M15 9h4a2 2 0 0 1 2 2v10"/><line x1="9" y1="7" x2="9" y2="9"/><line x1="11" y1="7" x2="11" y2="9"/></svg>
+          </span>
+          <span class="home-categories__body">
+            <span class="home-categories__title">🏨 حجز فندق</span>
+            <span class="home-categories__desc">أرسل طلبك وأفضل الخيارات عبر واتساب</span>
+          </span>
+          <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <a class="home-categories__card" href="#visa">
+          <span class="home-categories__icon home-categories__icon--visa">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="16" r="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="home-categories__body">
+            <span class="home-categories__title">🛂 طلب فيزا</span>
+            <span class="home-categories__desc">استفسر عن إصدار الفيزا بسهولة</span>
           </span>
           <svg class="home-categories__arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </a>

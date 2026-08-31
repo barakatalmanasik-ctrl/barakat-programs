@@ -1,0 +1,268 @@
+/* PWA: install button, offline banner, iOS install sheet */
+
+/* ---- Install button (More page) ---- */
+.more-page__install {
+  margin-top: var(--space-xl);
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.install-app-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: box-shadow var(--transition-normal), border-color var(--transition-normal), transform var(--transition-fast);
+  font-family: var(--font-family);
+}
+
+.install-app-btn:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-100);
+  transform: translateY(-1px);
+}
+
+.install-app-btn svg {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  color: var(--color-secondary);
+}
+
+.install-app-btn__text {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  flex: 1;
+  min-width: 0;
+}
+
+.install-app-btn__text strong {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.install-app-btn__text small {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.install-app-btn__chev {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-tertiary);
+  line-height: 1;
+}
+
+/* ---- Offline banner ---- */
+.pwa-offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-modal) + 10);
+  padding: env(safe-area-inset-top, 0px) 0 0;
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-lg);
+  animation: pwa-banner-slide var(--transition-normal);
+}
+
+@keyframes pwa-banner-slide {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.pwa-offline-banner__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pwa-offline-banner__icon {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+}
+
+.pwa-offline-banner__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pwa-offline-banner__text strong {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.pwa-offline-banner__text span {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+}
+
+.pwa-offline-banner__btn {
+  flex-shrink: 0;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-inverse);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.pwa-offline-banner__btn:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+/* ---- iOS install sheet ---- */
+.ios-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 5);
+  background: rgba(15, 36, 64, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: pwa-overlay-fade var(--transition-normal);
+}
+
+@keyframes pwa-overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ios-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: var(--space-sm) var(--space-xl) calc(var(--space-3xl) + env(safe-area-inset-bottom, 0px));
+  animation: pwa-sheet-up var(--transition-normal);
+  direction: rtl;
+}
+
+@keyframes pwa-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.ios-sheet__handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  margin: var(--space-xs) auto var(--space-lg);
+}
+
+.ios-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+}
+
+.ios-sheet__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.ios-sheet__close {
+  background: var(--color-surface-variant);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.ios-sheet__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.ios-sheet__steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.ios-sheet__step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.ios-sheet__steps strong {
+  display: block;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.ios-sheet__step-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.ios-sheet__step-desc b {
+  color: var(--color-primary);
+}
+
+.ios-sheet__btn {
+  margin-top: var(--space-2xl);
+  width: 100%;
+  padding: var(--space-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-secondary);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ios-sheet__btn:hover {
+  background: var(--color-secondary-dark);
+}
+
+@media (min-width: 768px) {
+  .ios-sheet {
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-2xl);
+  }
+}

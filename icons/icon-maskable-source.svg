@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Full-bleed background for maskable safe-zone (icon content stays in the inner ~80%) -->
+  <rect x="0" y="0" width="512" height="512" fill="#1B3A5C"/>
+  <rect x="0" y="0" width="512" height="512" fill="none" stroke="#2C5F8A" stroke-width="6"/>
+
+  <path d="M120 400 Q256 320 392 400" fill="none" stroke="#2C5F8A" stroke-width="12" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Plane scaled to fit the maskable safe zone (central 80%) -->
+  <g fill="#C8963E" transform="translate(256 268) scale(1.15)">
+    <path d="M-118 -15 L14 -15 L118 7 L14 21 L-19 52 L-36 21 Z" fill="#C8963E"/>
+    <path d="M-118 -15 L14 -15 L14 5 L-94 16 Z" fill="#D4AB5E"/>
+    <path d="M-118 -15 L-94 -55 L-82 -27 Z" fill="#D4AB5E"/>
+    <path d="M-70 -7 L48 -7" stroke="#A67A2E" stroke-width="5" stroke-linecap="round" opacity="0.45"/>
+  </g>
+</svg>

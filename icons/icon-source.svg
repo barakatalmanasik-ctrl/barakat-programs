@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: rounded square in brand navy -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="#1B3A5C"/>
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="#2C5F8A" stroke-width="4"/>
+
+  <!-- Subtle horizon swoosh -->
+  <path d="M96 392 Q256 320 416 392" fill="none" stroke="#2C5F8A" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Modern minimalist paper-plane -->
+  <g fill="#C8963E" transform="translate(256 256)">
+    <!-- fuselage arrow -->
+    <path d="M-150 -18 L18 -18 L150 8 L18 26 L-24 66 L-46 26 Z" fill="#C8963E"/>
+    <!-- main wing -->
+    <path d="M-150 -18 L18 -18 L18 6 L-120 20 Z" fill="#D4AB5E"/>
+    <!-- tail -->
+    <path d="M-150 -18 L-120 -70 L-104 -34 Z" fill="#D4AB5E"/>
+    <!-- highlight -->
+    <path d="M-90 -8 L60 -8" stroke="#A67A2E" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
+  </g>
+</svg>
