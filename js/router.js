@@ -54,9 +54,14 @@ const Router = {
   },
 
   // Switch page WITHOUT a history entry (auth guards, "go home" fallbacks).
-  replace(route) {
+  replace(route, adminDenied) {
     route = String(route || '').replace(/^#/, '');
     if (!route) route = 'home';
+    if (adminDenied) {
+      // Tell the admin login screen to show "insufficient permission".
+      // The flag is read once and is not persisted (not in localStorage).
+      this._adminDenied = true;
+    }
     const current = this._route();
     this._forward = false;
     if (route === current) {
@@ -131,26 +136,14 @@ const Router = {
       const adminSub = parts[1];
       if (adminSub === 'login') {
         this.navigateToSub('admin/login');
-      } else if (!AuthService.isLoggedIn) {
-        // Logged-out visitors must not see the dashboard shell.
-        this.replace('admin/login');
-        return;
-      } else if (adminSub === 'dashboard') {
-        this._ensureAdminShell();
       } else {
-        this._ensureAdminShell();
-        if (adminSub === 'bookings') {
-          showAdminBookings();
-        } else if (adminSub === 'booking' && parts[2]) {
-          showAdminBookingDetail(parts[2]);
-        } else if (adminSub === 'settings') {
-          showAdminSettings();
-        } else if (adminSub === 'gallery') {
-          showAdminGallery();
-        } else {
-          this.replace('admin/dashboard');
-          return;
-        }
+        // Authorize every admin route server-side (RLS-backed role check).
+        // This runs for #admin/dashboard, #admin/bookings, #admin/settings,
+        // #admin/gallery and any other #admin/... route. A logged-in account
+        // that is NOT the single admin is routed to the admin login screen
+        // which reports "no permission"; a logged-out visitor is sent there
+        // too. URL manipulation can never bypass this.
+        this._handleAdminRoute(adminSub, parts);
       }
     } else if (page === 'detail' && parts[1]) {
       this.navigateTo('detail', decodeURIComponent(parts[1]));
@@ -186,6 +179,29 @@ const Router = {
     if (wasForward) this._push(route);
     else this._sync(route);
     this._lastRoute = route;
+  },
+
+  async _handleAdminRoute(adminSub, parts) {
+    if (!AuthService.isLoggedIn) {
+      // Not logged in → force the admin login page.
+      this.replace('admin/login');
+      return;
+    }
+    // Real (server-enforced) admin check through RLS. Never trusts the
+    // in-memory role or any client-editable storage.
+    const isAdmin = await AuthService.isAdmin();
+    if (!isAdmin) {
+      // Logged in but NOT the admin account: block hard.
+      this.replace('admin/login', true);
+      return;
+    }
+    this._ensureAdminShell();
+    if (adminSub === 'dashboard') return;
+    if (adminSub === 'bookings') { showAdminBookings(); return; }
+    if (adminSub === 'booking' && parts[2]) { showAdminBookingDetail(parts[2]); return; }
+    if (adminSub === 'settings') { showAdminSettings(); return; }
+    if (adminSub === 'gallery') { showAdminGallery(); return; }
+    this.replace('admin/dashboard');
   },
 
   _ensureAdminShell() {

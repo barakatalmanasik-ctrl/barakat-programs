@@ -49,6 +49,25 @@ const AuthService = {
   get isLoggedIn() { return !!this._user; },
   get isSupabase() { return this._useSupabase; },
 
+  // Server-enforced admin check: reads the CURRENT profile role straight from
+  // the database through RLS (never trusts a stale in-memory copy). Returns
+  // true only for the single account whose profile.role is 'admin' — which
+  // the DB trigger forbids anyone from changing.
+  async isAdmin() {
+    if (!this._user || !this._useSupabase) return false;
+    try {
+      const { data, error } = await SupabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', this._user.id)
+        .maybeSingle();
+      if (error) return false;
+      return !!(data && data.role === 'admin');
+    } catch (e) {
+      return false;
+    }
+  },
+
   onChange(callback) {
     this._listeners.push(callback);
     return () => { this._listeners = this._listeners.filter(l => l !== callback); };

@@ -25,6 +25,17 @@
   max-width: 420px;
 }
 
+.admin-login__denied {
+  margin-top: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-sm);
+  background: var(--color-error-bg, #FDE8E8);
+  color: var(--color-error, #C0392B);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
 .admin-layout {
   display: flex;
   min-height: 100vh;

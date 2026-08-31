@@ -2,6 +2,9 @@ function renderAdminLoginPage() {
   const container = document.getElementById('admin-login-content');
   if (!container) return;
 
+  const denied = !!(window.Router && Router._adminDenied);
+  if (window.Router) Router._adminDenied = false;
+
   container.innerHTML = `
     <div class="admin-login">
       <div class="auth-page">
@@ -11,6 +14,7 @@ function renderAdminLoginPage() {
           </div>
           <h1 class="auth-page__title">لوحة التحكم</h1>
           <p class="auth-page__subtitle">سجّل الدخول للوصول إلى لوحة التحكم</p>
+          ${denied ? `<div class="admin-login__denied">ليس لديك صلاحية للوصول إلى لوحة الإدارة.</div>` : ''}
         </div>
         <form class="auth-form" id="admin-login-form" onsubmit="handleAdminLogin(event)">
           <div class="auth-form__group">
@@ -84,6 +88,17 @@ async function handleAdminLogin(e) {
     await waitForAdminUser();
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<span>تسجيل الدخول</span>';
+
+    // Server-enforced authorization: only the single admin account may enter.
+    const isAdmin = await AuthService.isAdmin();
+    if (!isAdmin) {
+      // A valid login that is NOT the admin account is refused right here.
+      await AuthService.logout();
+      errorEl.textContent = 'ليس لديك صلاحية للوصول إلى لوحة الإدارة.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
     Router.go('admin/dashboard');
   } catch (err) {
     submitBtn.disabled = false;
