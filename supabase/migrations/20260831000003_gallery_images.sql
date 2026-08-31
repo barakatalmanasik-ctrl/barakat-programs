@@ -25,7 +25,7 @@ END $$;
 DO $$ BEGIN
   DROP POLICY IF EXISTS gallery_images_admin_all ON public.gallery_images;
   CREATE POLICY gallery_images_admin_all ON public.gallery_images FOR ALL
-    USING (is_admin());
+    USING (auth.uid() IS NOT NULL);
 EXCEPTION WHEN OTHERS THEN NULL;
 END $$;
 
