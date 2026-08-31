@@ -22,6 +22,10 @@ function renderAdminDashboard() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             الإعدادات
           </a>
+          <a class="admin-sidebar__link" href="#admin/gallery" id="admin-nav-gallery" onclick="closeAdminSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            المعرض والصور
+          </a>
         </nav>
       </aside>
 
@@ -786,6 +790,116 @@ function saveAdminSettings() {
   SiteSettings.set('whatsappNumber', digits);
   if (msg) { msg.textContent = '✔ تم حفظ رقم الواتساب بنجاح'; msg.style.color = '#2D7A3A'; }
   showAdminToast('تم حفظ رقم الواتساب', 'success');
+}
+
+let _adminGalleryFilter = 'all';
+
+async function showAdminGallery(filter) {
+  _adminSetActiveNav('admin-nav-gallery');
+  _adminGalleryFilter = filter || _adminGalleryFilter || 'all';
+
+  const content = document.getElementById('admin-main-content');
+  if (!content) return;
+
+  content.innerHTML = `
+    <div class="admin-panel">
+      <div class="admin-toolbar">
+        <h2 class="admin-toolbar__title">المعرض والصور</h2>
+        <div class="admin-conv-filters">
+          ${[['all','الكل'],['shown','ظاهرة'],['hidden','مخفية']].map(([k,l]) =>
+            `<button class="admin-conv-filter ${_adminGalleryFilter===k?'admin-conv-filter--active':''}" onclick="showAdminGallery('${k}')">${l}</button>`
+          ).join('')}
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table admin-table--programs">
+          <thead>
+            <tr>
+              <th>الصورة</th>
+              <th>المصدر</th>
+              <th>الحالة</th>
+              <th>الترتيب</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="admin-gallery-tbody">
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--color-text-tertiary)">جارٍ تحميل الصور...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  await loadAdminGallery();
+}
+
+async function loadAdminGallery() {
+  const tbody = document.getElementById('admin-gallery-tbody');
+  if (!tbody) return;
+  try {
+    let query = SupabaseClient
+      .from('gallery_images')
+      .select('id, image_url, enabled, sort_order')
+      .order('sort_order', { ascending: true });
+    const { data, error } = await _adminTimeout(query);
+    if (error) throw error;
+
+    if (!document.getElementById('admin-gallery-tbody')) return;
+
+    if (!data || !data.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="admin-empty"><div class="admin-empty__icon">📸</div><div class="admin-empty__title">لا توجد صور</div><div class="admin-empty__text">لا يوجد محتوى في معرض الصور بعد</div></div></td></tr>`;
+      return;
+    }
+
+    let list = data;
+    if (_adminGalleryFilter === 'shown') list = data.filter(i => i.enabled);
+    else if (_adminGalleryFilter === 'hidden') list = data.filter(i => !i.enabled);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5">${data.length ? '<div class="admin-empty"><div class="admin-empty__icon">🔍</div><div class="admin-empty__title">لا توجد صور مطابقة</div></div>' : ''}</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(img => `
+      <tr>
+        <td>
+          <img class="admin-gallery-thumb" src="${escapeHtml(img.image_url)}" alt="صورة" onerror="this.style.visibility='hidden'">
+        </td>
+        <td><span dir="ltr" style="font-size:12px;color:var(--color-text-tertiary)">${escapeHtml(img.image_url)}</span></td>
+        <td>
+          <span class="admin-table__status ${img.enabled ? 'admin-table__status--published' : 'admin-table__status--draft'}">
+            ${img.enabled ? 'ظاهرة' : 'مخفية'}
+          </span>
+        </td>
+        <td>${img.sort_order || 0}</td>
+        <td>
+          <div class="admin-table__actions">
+            <button class="admin-btn--icon" title="${img.enabled ? 'إخفاء من الموقع' : 'إظهار على الموقع'}" onclick="toggleAdminGalleryImage('${img.id}', ${img.enabled ? 'false' : 'true'})" style="${img.enabled ? 'color:var(--color-warning)' : 'color:var(--color-success)'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${img.enabled ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>' : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'}</svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    if (!document.getElementById('admin-gallery-tbody')) return;
+    tbody.innerHTML = `<tr><td colspan="5"><div class="admin-empty"><div class="admin-empty__icon">⚠️</div><div class="admin-empty__title">${escapeHtml(e.message)}</div></div></td></tr>`;
+  }
+}
+
+async function toggleAdminGalleryImage(id, enabled) {
+  const label = enabled ? 'إظهار هذه الصورة على الموقع' : 'إخفاء هذه الصورة من الموقع';
+  if (!confirm('هل أنت متأكد من ' + label + '؟')) return;
+  try {
+    const { error } = await SupabaseClient
+      .from('gallery_images')
+      .update({ enabled })
+      .eq('id', id);
+    if (error) throw error;
+    showAdminToast(enabled ? 'تم إظهار الصورة على الموقع' : 'تم إخفاء الصورة من الموقع', 'success');
+    await loadAdminGallery();
+  } catch (e) {
+    showAdminToast(e.message || 'تعذر تنفيذ العملية', 'error');
+  }
 }
 
 let _adminBookingFilter = 'all';

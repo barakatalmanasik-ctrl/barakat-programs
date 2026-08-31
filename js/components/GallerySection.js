@@ -1,26 +1,69 @@
-const GALLERY_IMAGES = Array.from(
+const GALLERY_STATIC_FALLBACK = Array.from(
   { length: 30 },
   (_, i) => `images/trips/trip-${String(i + 1).padStart(2, '0')}.jpeg`
 );
 
-const GALLERY_PREVIEW_COUNT = 8;
+let GALLERY_IMAGES = [];
 
 function GallerySection() {
-  const items = GALLERY_IMAGES.map((src, i) => `
+  return `
+    <div class="detail-page__section">
+      <h3 class="detail-page__section-title">📸 معرض الصور</h3>
+      <div class="gallery__grid gallery--collapsed" id="trip-gallery">
+        <div class="gallery__loading">جاري تحميل الصور...</div>
+      </div>
+      <button class="gallery__more" onclick="toggleGallery()" style="display:none">عرض كل الصور</button>
+    </div>
+  `;
+}
+
+async function loadGalleryImages() {
+  const grid = document.getElementById('trip-gallery');
+  if (!grid) return;
+
+  let items = [];
+  try {
+    const { data, error } = await SupabaseClient
+      .from('gallery_images')
+      .select('image_url')
+      .eq('enabled', true)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    items = (data || []).map(r => r.image_url).filter(Boolean);
+  } catch (e) {
+    // Database unreachable: keep showing the classic static album.
+    items = GALLERY_STATIC_FALLBACK.slice();
+  }
+
+  const gridNow = document.getElementById('trip-gallery');
+  if (!gridNow || gridNow !== grid) return;
+
+  GALLERY_IMAGES = items;
+  renderGalleryGrid();
+}
+
+function renderGalleryGrid() {
+  const grid = document.getElementById('trip-gallery');
+  if (!grid) return;
+  const more = grid.parentElement.querySelector('.gallery__more');
+
+  if (GALLERY_IMAGES.length === 0) {
+    grid.classList.remove('gallery--collapsed');
+    grid.innerHTML = '<div class="gallery__empty">لا توجد صور في المعرض حالياً</div>';
+    if (more) more.style.display = 'none';
+    return;
+  }
+
+  grid.innerHTML = GALLERY_IMAGES.map((src, i) => `
     <button class="gallery__item" onclick="openGallery(${i})" aria-label="فتح الصورة ${i + 1}">
       <img src="${src}" alt="صورة ${i + 1}" loading="lazy">
     </button>
   `).join('');
 
-  return `
-    <div class="detail-page__section">
-      <h3 class="detail-page__section-title">📸 معرض الصور</h3>
-      <div class="gallery__grid gallery--collapsed" id="trip-gallery">
-        ${items}
-      </div>
-      <button class="gallery__more" onclick="toggleGallery()">عرض كل الصور (${GALLERY_IMAGES.length})</button>
-    </div>
-  `;
+  if (more) {
+    more.style.display = '';
+    more.textContent = `عرض كل الصور (${GALLERY_IMAGES.length})`;
+  }
 }
 
 function toggleGallery() {
@@ -38,6 +81,7 @@ function toggleGallery() {
 let galleryLightboxIndex = 0;
 
 function openGallery(index) {
+  if (!GALLERY_IMAGES.length) return;
   galleryLightboxIndex = index;
   if (document.getElementById('gallery-lightbox')) closeGallery();
 
@@ -70,6 +114,7 @@ function closeGallery() {
 }
 
 function galleryNav(dir) {
+  if (!GALLERY_IMAGES.length) return;
   galleryLightboxIndex =
     (galleryLightboxIndex + dir + GALLERY_IMAGES.length) % GALLERY_IMAGES.length;
   const img = document.querySelector('#gallery-lightbox img');

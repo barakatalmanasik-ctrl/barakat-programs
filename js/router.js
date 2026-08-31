@@ -145,6 +145,8 @@ const Router = {
           showAdminBookingDetail(parts[2]);
         } else if (adminSub === 'settings') {
           showAdminSettings();
+        } else if (adminSub === 'gallery') {
+          showAdminGallery();
         } else {
           this.replace('admin/dashboard');
           return;
@@ -170,7 +172,7 @@ const Router = {
         return;
       }
       this.navigateToSub(page);
-    } else if (['home', 'programs', 'more'].includes(page)) {
+    } else if (['home', 'programs', 'more', 'tickets'].includes(page)) {
       this.navigateTo(page);
     } else {
       // Unknown hashes (placeholder anchors like #terms/#privacy, #home/#more
@@ -241,6 +243,8 @@ const Router = {
       renderDetailPage(detailId);
     } else if (page === 'more') {
       renderMorePage();
+    } else if (page === 'tickets') {
+      renderTicketsPage();
     }
   },
 

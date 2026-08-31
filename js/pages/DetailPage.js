@@ -142,6 +142,8 @@ function renderDetailPage(programId) {
       </div>
     </div>
   `;
+
+  loadGalleryImages();
 }
 
 var _shareProgramId = null;

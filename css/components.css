@@ -1444,6 +1444,17 @@
   background: var(--color-primary-100);
 }
 
+.gallery__loading,
+.gallery__empty {
+  grid-column: 1 / -1;
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+}
+
 .gallery-lightbox {
   position: fixed;
   inset: 0;
@@ -4363,4 +4374,143 @@ background: var(--color-surface);
   color: var(--color-text-tertiary);
   text-align: center;
   margin-top: var(--space-md);
+}
+
+/* ===== TICKETS SECTION (top-level, besides programs) ===== */
+.tickets-page {
+  min-height: 100vh;
+  background: var(--color-background);
+  padding: var(--space-lg);
+}
+
+.tickets-page__header {
+  margin-bottom: var(--space-xl);
+}
+
+.tickets-page__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.tickets-page__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-sm);
+}
+
+.tickets-page__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.tickets-result {
+  margin-top: var(--space-lg);
+}
+
+.tickets-result__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.tickets-result__icon {
+  font-size: 32px;
+}
+
+.tickets-result__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: var(--space-sm) 0 var(--space-sm);
+}
+
+.tickets-result__text {
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+/* ===== HOME CATEGORIES (البرامج | التذاكر) ===== */
+.home-categories {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 520px) {
+  .home-categories {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.home-categories__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: var(--space-md);
+  text-decoration: none;
+  transition: transform var(--transition-fast);
+}
+
+.home-categories__card:active {
+  transform: scale(0.98);
+}
+
+.home-categories__icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-categories__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.home-categories__icon--programs {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.home-categories__icon--tickets {
+  background: #25D366;
+  color: #fff;
+}
+
+.home-categories__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-categories__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.home-categories__desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.home-categories__arrow {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  stroke: var(--color-text-tertiary);
 }
