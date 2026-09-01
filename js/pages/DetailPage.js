@@ -59,7 +59,9 @@ function renderDetailPage(programId) {
           </div>
         </div>
 
-        ${GallerySection()}
+        ${program.gallery && program.gallery.length
+          ? ProgramGallerySection(program)
+          : GallerySection()}
 
         ${program.highlights ? `
           <div class="detail-page__section">
@@ -143,7 +145,93 @@ function renderDetailPage(programId) {
     </div>
   `;
 
-  loadGalleryImages();
+  if (program.gallery && program.gallery.length) {
+    const pg = document.getElementById('program-gallery');
+    if (pg) renderProgramGallery(pg, program);
+  } else {
+    loadGalleryImages();
+  }
+}
+
+let _programGalleryItems = [];
+
+function ProgramGallerySection(program) {
+  return `
+    <div class="detail-page__section">
+      <h3 class="detail-page__section-title">📸 معرض صور البرنامج</h3>
+      <div class="gallery__grid gallery--collapsed" id="program-gallery">
+        <div class="gallery__loading">جاري تحميل الصور...</div>
+      </div>
+      <button class="gallery__more" onclick="toggleProgramGallery()" style="display:none">عرض كل الصور</button>
+    </div>
+  `;
+}
+
+function renderProgramGallery(grid, program) {
+  const more = grid.parentElement.querySelector('.gallery__more');
+  const items = program.gallery || [];
+  if (!items.length) {
+    grid.classList.remove('gallery--collapsed');
+    grid.innerHTML = '<div class="gallery__empty">لا توجد صور في المعرض حالياً</div>';
+    if (more) more.style.display = 'none';
+    return;
+  }
+  _programGalleryItems = items;
+  grid.innerHTML = items.map((src, i) => `
+    <button class="gallery__item" onclick="openProgramGallery(${i})" aria-label="فتح الصورة ${i + 1}">
+      <img src="${src}" alt="صورة ${i + 1}" loading="lazy">
+    </button>
+  `).join('');
+  if (more) {
+    more.style.display = '';
+    more.textContent = `عرض كل الصور (${items.length})`;
+  }
+}
+
+function toggleProgramGallery() {
+  const grid = document.getElementById('program-gallery');
+  if (!grid) return;
+  const collapsed = grid.classList.toggle('gallery--collapsed');
+  const btn = grid.parentElement.querySelector('.gallery__more');
+  if (btn) {
+    btn.textContent = collapsed ? `عرض كل الصور (${_programGalleryItems.length})` : 'إخفاء الصور';
+  }
+}
+
+function openProgramGallery(index) {
+  if (!_programGalleryItems.length) return;
+  galleryLightboxIndex = index;
+  if (document.getElementById('gallery-lightbox')) closeGallery();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'gallery-lightbox';
+  overlay.id = 'gallery-lightbox';
+  overlay.innerHTML = `
+    <div class="gallery-lightbox__img-wrap">
+      <img src="${_programGalleryItems[galleryLightboxIndex]}" alt="صورة الرحلة">
+      <button class="gallery-lightbox__btn gallery-lightbox__close" onclick="closeGallery()" aria-label="إغلاق">&times;</button>
+      <button class="gallery-lightbox__btn gallery-lightbox__nav gallery-lightbox__nav--prev" onclick="programGalleryNav(-1)" aria-label="الصورة السابقة">&rsaquo;</button>
+      <button class="gallery-lightbox__btn gallery-lightbox__nav gallery-lightbox__nav--next" onclick="programGalleryNav(1)" aria-label="الصورة التالية">&lsaquo;</button>
+      <div class="gallery-lightbox__counter"></div>
+    </div>
+  `;
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeGallery();
+  });
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+  updateGalleryCounter();
+}
+
+function programGalleryNav(dir) {
+  if (!_programGalleryItems.length) return;
+  galleryLightboxIndex =
+    (galleryLightboxIndex + dir + _programGalleryItems.length) % _programGalleryItems.length;
+  const img = document.querySelector('#gallery-lightbox img');
+  if (img) img.src = _programGalleryItems[galleryLightboxIndex];
+  updateGalleryCounter();
 }
 
 var _shareProgramId = null;

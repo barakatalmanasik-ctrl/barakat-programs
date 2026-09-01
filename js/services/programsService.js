@@ -25,7 +25,8 @@ const ProgramsService = {
   // and every program used to fall back to "إيران".
   _destFallbackMap: {
     '11111111-1111-1111-1111-111111111111': { name: 'إيران', emoji: '🇮🇷', gradient: 'linear-gradient(135deg, #1B3A5C 0%, #2C5F8A 100%)' },
-    '22222222-2222-2222-2222-222222222222': { name: 'السعودية', emoji: '🇸🇦', gradient: 'linear-gradient(135deg, #0F4C5C 0%, #1B7A8C 100%)' }
+    '22222222-2222-2222-2222-222222222222': { name: 'السعودية', emoji: '🇸🇦', gradient: 'linear-gradient(135deg, #0F4C5C 0%, #1B7A8C 100%)' },
+    '33333333-3333-3333-3333-333333333333': { name: 'تركيا', emoji: '🇹🇷', gradient: 'linear-gradient(135deg, #C0392B 0%, #E67E22 100%)' }
   },
 
   // Static gallery fallback for the fixed hotel names (3 photos each). Used
@@ -64,6 +65,7 @@ const ProgramsService = {
       status: p.status,
       statusText: p.statusText || this._statusTextMap[p.status] || 'متاح',
       coverImage: p.coverImage,
+      gallery: p.gallery || [],
       emoji: p.emoji,
       gradient: p.gradient,
       dateDeparture: p.dateDeparture,
@@ -158,6 +160,7 @@ const ProgramsService = {
         status: p.status,
         statusText: this._statusTextMap[p.status] || 'متاح',
         coverImage: p.cover_image,
+        gallery: p.gallery || [],
         emoji: p.emoji,
         gradient: p.gradient || dest.gradient || undefined,
         dateDeparture: p.date_departure,
@@ -186,6 +189,7 @@ const ProgramsService = {
         if (!norm.itinerary.length) norm.itinerary = (mock.itinerary || []).map(d => Object.assign({}, d));
         if (!norm.hotels.length) norm.hotels = (mock.hotels || []).map(h => Object.assign({}, h));
         if (!norm.coverImage) norm.coverImage = mock.coverImage || null;
+        if (mock.gallery && mock.gallery.length) norm.gallery = mock.gallery.slice();
         if (!norm.emoji) norm.emoji = mock.emoji;
         if (!norm.gradient) norm.gradient = mock.gradient;
         if (!norm.dateDisplay || norm.dateDisplay === 'قريباً') norm.dateDisplay = mock.dateDisplay || norm.dateDisplay;
